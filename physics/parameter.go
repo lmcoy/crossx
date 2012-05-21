@@ -21,28 +21,38 @@ const (
 	MeV = 1.0e-3
 	KeV = 1.0e-6
 	TeV = 1.0e+3
+	// Converts a cross section in 1/GeV^2 to pb
+	CrossSectionToPb = 3.8937944929e8
 )
 
 const (
+	// sin(𝜃w)^2
 	Sw2 = 0.2312
 	//Alpha = 1.0 / 127.934
 	Alpha = 1.0 / 137.0
+	// Z boson mass
 	Mz    = 91.1876 * GeV
+	// W boson mass
 	Mw    = 80.385 * GeV
+	// electron mass
 	Me    = 0.510998928 * MeV
+	// proton mass
 	Mp    = 0.93827204 * GeV
+	// neutron mass
 	Mn    = 939.565378 * MeV
+	// charged pion mass
 	Mpi   = 139.57018 * MeV
+	// pion mass
 	Mpi0  = 134.9766 * MeV
 )
 
 // NeutralinoMassMatrix returns the mass matrix for neutralinos with the SUSY parameters in susy.
 //
 // mass matrix (symmetric):
-// ( M_bino     0      -cos(𝛽)*sw*Mz   sin(𝛽)*sw*Mz ) 
-// (    0    M_wino     cos(𝛽)*cw*Mz  -sin(𝛽)*cw*Mz )
-// (    *       *             0             -µ      )
-// (    *       *            -µ              0      )
+// ( M_bino,     0,      -cos(𝛽)*sw*Mz,   sin(𝛽)*sw*Mz ) 
+// (    0,    M_wino,     cos(𝛽)*cw*Mz,  -sin(𝛽)*cw*Mz )
+// (    *,       *,             0,             -µ      )
+// (    *,       *,            -µ,              0      )
 func NeutralinoMassMatrix(susy *SUSY) (m *math3d.Matrix4) {
 	m = math3d.NewMatrix4()
 	sw := math.Sqrt(Sw2)
@@ -73,26 +83,30 @@ func NeutralinoMassMatrix(susy *SUSY) (m *math3d.Matrix4) {
 	return
 }
 
+// CharginoMassMatrix returns the 2x2 chargino mass matrix.
+//
+// ( M_wino,        √2*Mw*cos(𝛽) )
+// ( √2*Mw*sin(𝛽),       µ       )
 func CharginoMassMatrix(susy *SUSY) (m *math3d.Matrix2) {
 	m = math3d.NewMatrix2()
 	sb := math.Sin(math.Atan(susy.TanBeta))
 	cb := math.Cos(math.Atan(susy.TanBeta))
 
 	m.Set(0, 0, susy.M_wino)
-	m.Set(0, 1, math.Sqrt(2)*Mw*cb)
-	m.Set(1, 0, math.Sqrt(2)*Mw*sb)
+	m.Set(0, 1, math.Sqrt2*Mw*cb)
+	m.Set(1, 0, math.Sqrt2*Mw*sb)
 	m.Set(1, 1, susy.Mu)
 	return
 }
 
 func A_L_Chargino(j int, U *math3d.Matrix2) float64 {
 	sw := math.Sqrt(Sw2)
-	return 1.0 / math.Sqrt(2.0) * U.At(j, 0) / sw
+	return 1.0 / math.Sqrt2 * U.At(j, 0) / sw
 }
 
 func A_L_c_Chargino(j int, V *math3d.Matrix2) float64 {
 	sw := math.Sqrt(Sw2)
-	return 1.0 / math.Sqrt(2.0) * V.At(j, 0) / sw
+	return 1.0 / math.Sqrt2 * V.At(j, 0) / sw
 }
 
 func A_L(i int, q, T3 float64, N *math3d.Matrix4) float64 {
@@ -265,15 +279,19 @@ func M2(s, cos_theta float64, p *Parameter) float64 {
 	u_q := u - p.Susy.M_squark*p.Susy.M_squark
 	s_q := s - Mw*Mw
 
+	// s channel
 	ss := 2.0 / s_q / s_q * (p.L*p.L*l*l*u_i*u_j + s*p.M_i*p.M_j*l*l*2*p.L*p.R + p.R*p.R*l*l*t_i*t_j)
+	// t channel
 	tt := 1.0 / t_q / t_q * p.A_L_t * p.A_L_t * p.A_L_Chargino * p.A_L_Chargino * t_i * t_j
+	// u channel
 	uu := 1.0 / u_q / u_q * p.A_L_u * p.A_L_u * p.A_L_c_Chargino * p.A_L_c_Chargino * u_i * u_j
 
+	// interference terms
 	ts := 2.0 / t_q / s_q * (l*p.L*p.M_i*p.M_j*s + l*p.R*t_i*t_j) * p.A_L_t * p.A_L_Chargino
 	us := 2.0 / u_q / s_q * (l*p.L*u_i*u_j + p.M_i*p.M_j*p.R*l*s) * (p.A_L_c_Chargino * p.A_L_u)
 	tu := 2.0 / t_q / u_q * p.M_i * p.M_j * s * p.A_L_t * p.A_L_u * p.A_L_Chargino * p.A_L_c_Chargino
 
-	return (1.0*ss + 1.0*tt + 1.0*uu + 1.0*ts - 1.0*us - 1.0*tu)
+	return (0.5*ss + 16.0*tt + 16.0*uu + 4.0*ts - 4.0*us - 16.0*tu)
 }
 
 func DSigma2(s, cos_theta float64, p *Parameter) float64 {
@@ -369,7 +387,7 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 			return 0.0
 		}
 		// refactorizing scale for the pdfs. 
-		Q := 1000.0
+		Q := 500.0
 		// get values of pdfs
 		fu_x1 := pdf.Xfx(x1, Q, pdf.UQuark) / x1
 		fd_x2 := pdf.Xfx(x2, Q, pdf.DBarQuark) / x2
@@ -388,7 +406,7 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 	fmt.Printf("DSigma( s, tmax/2.0, p ) = %e\n", DSigma(s, tmax/2.0, p))
 	fmt.Printf("DSigma( s, tmax, p ) = %e\n", DSigma2(s, tmax, p))
 	sigma, error = integrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, 3000000)
-	sigma *= 3.8937944929e8 // Convert 1/GeV^2 in pb
-	error *= 3.8937944929e8
+	sigma *=  CrossSectionToPb// Convert 1/GeV^2 in pb
+	error *= CrossSectionToPb
 	return
 }

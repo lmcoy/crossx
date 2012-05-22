@@ -31,28 +31,28 @@ const (
 	//Alpha = 1.0 / 127.934
 	Alpha = 1.0 / 137.0
 	// Z boson mass
-	Mz    = 91.1876 * GeV
+	Mz = 91.1876 * GeV
 	// W boson mass
-	Mw    = 80.385 * GeV
+	Mw = 80.385 * GeV
 	// electron mass
-	Me    = 0.510998928 * MeV
+	Me = 0.510998928 * MeV
 	// proton mass
-	Mp    = 0.93827204 * GeV
+	Mp = 0.93827204 * GeV
 	// neutron mass
-	Mn    = 939.565378 * MeV
+	Mn = 939.565378 * MeV
 	// charged pion mass
-	Mpi   = 139.57018 * MeV
+	Mpi = 139.57018 * MeV
 	// pion mass
-	Mpi0  = 134.9766 * MeV
+	Mpi0 = 134.9766 * MeV
 )
 
 // NeutralinoMassMatrix returns the mass matrix for neutralinos with the SUSY parameters in susy.
 //
-// mass matrix (symmetric):
-// ( M_bino,     0,      -cos(𝛽)*sw*Mz,   sin(𝛽)*sw*Mz ) 
-// (    0,    M_wino,     cos(𝛽)*cw*Mz,  -sin(𝛽)*cw*Mz )
-// (    *,       *,             0,             -µ      )
-// (    *,       *,            -µ,              0      )
+// 	mass matrix (symmetric):
+// 	( M_bino,     0,      -cos(𝛽)*sw*Mz,   sin(𝛽)*sw*Mz ) 
+// 	(    0,    M_wino,     cos(𝛽)*cw*Mz,  -sin(𝛽)*cw*Mz )
+// 	(    *,       *,             0,             -µ      )
+// 	(    *,       *,            -µ,              0      )
 func NeutralinoMassMatrix(susy *SUSY) (m *math3d.Matrix4) {
 	m = math3d.NewMatrix4()
 	sw := math.Sqrt(Sw2)
@@ -85,8 +85,9 @@ func NeutralinoMassMatrix(susy *SUSY) (m *math3d.Matrix4) {
 
 // CharginoMassMatrix returns the 2x2 chargino mass matrix.
 //
-// ( M_wino,        √2*Mw*cos(𝛽) )
-// ( √2*Mw*sin(𝛽),       µ       )
+//	M =
+// 	( M_wino,        √2*Mw*cos(𝛽) )
+// 	( √2*Mw*sin(𝛽),       µ       )
 func CharginoMassMatrix(susy *SUSY) (m *math3d.Matrix2) {
 	m = math3d.NewMatrix2()
 	sb := math.Sin(math.Atan(susy.TanBeta))
@@ -279,12 +280,16 @@ func M2(s, cos_theta float64, p *Parameter) float64 {
 	u_q := u - p.Susy.M_squark*p.Susy.M_squark
 	s_q := s - Mw*Mw
 
+	l2 := l * l
+	L2 := p.L * p.L
+	R2 := p.R * p.R
+
 	// s channel
-	ss := 2.0 / s_q / s_q * (p.L*p.L*l*l*u_i*u_j + s*p.M_i*p.M_j*l*l*2*p.L*p.R + p.R*p.R*l*l*t_i*t_j)
+	ss := 2.0 / s_q / s_q * (L2*l2*u_i*u_j + s*p.M_i*p.M_j*l2*2*p.L*p.R + R2*l2*t_i*t_j)
 	// t channel
 	tt := 1.0 / t_q / t_q * p.A_L_t * p.A_L_t * p.A_L_Chargino * p.A_L_Chargino * t_i * t_j
 	// u channel
-	uu := 1.0 / u_q / u_q * p.A_L_u * p.A_L_u * p.A_L_c_Chargino * p.A_L_c_Chargino * u_i * u_j
+	uu := 1.0 / u_q / u_q * p.A_L_u * p.A_L_u * p.A_L_c_Chargino * p.A_L_c_Chargino * t_i * t_j
 
 	// interference terms
 	ts := 2.0 / t_q / s_q * (l*p.L*p.M_i*p.M_j*s + l*p.R*t_i*t_j) * p.A_L_t * p.A_L_Chargino
@@ -292,6 +297,7 @@ func M2(s, cos_theta float64, p *Parameter) float64 {
 	tu := 2.0 / t_q / u_q * p.M_i * p.M_j * s * p.A_L_t * p.A_L_u * p.A_L_Chargino * p.A_L_c_Chargino
 
 	return (0.5*ss + 16.0*tt + 16.0*uu + 4.0*ts - 4.0*us - 16.0*tu)
+	//return ss + tt + uu + ts - us - tu
 }
 
 func DSigma2(s, cos_theta float64, p *Parameter) float64 {
@@ -371,8 +377,8 @@ func DSigma(s, cos𝜃 float64, p *Parameter) float64 {
 
 // Sigma returns the total cross section of the process pp -> 𝜒_1^+ 𝜒_2^0.
 //
-// s: mandelstam, e.g. s = (14000*GeV)^2
-// p: SUSY parameter
+// 	s: mandelstam, e.g. s = (14000 GeV)²
+// 	p: SUSY parameter
 func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 	tau := (p.M_i + p.M_j) * (p.M_i + p.M_j)
 	fmt.Printf("tau = %f\n", tau)
@@ -387,14 +393,14 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 			return 0.0
 		}
 		// refactorizing scale for the pdfs. 
-		Q := 500.0
+		Q := 1000.0
 		// get values of pdfs
 		fu_x1 := pdf.Xfx(x1, Q, pdf.UQuark) / x1
 		fd_x2 := pdf.Xfx(x2, Q, pdf.DBarQuark) / x2
 		fu_x2 := pdf.Xfx(x2, Q, pdf.UQuark) / x2
 		fd_x1 := pdf.Xfx(x1, Q, pdf.DBarQuark) / x1
 
-		return (fu_x1*fd_x2 + fd_x1*fu_x2) * DSigma(x1*x2*s, t, p)
+		return (fu_x1*fd_x2 + fd_x1*fu_x2) * DSigma2(x1*x2*s, t, p)
 		//return DSigma3(s,t, p)
 	}
 
@@ -402,11 +408,15 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 	tmin := -1.0
 	tmax := 1.0
 
+	// print debug messages
 	fmt.Printf("DSigma( s, tmin, p ) = %e\n", DSigma(s, tmin, p))
 	fmt.Printf("DSigma( s, tmax/2.0, p ) = %e\n", DSigma(s, tmax/2.0, p))
-	fmt.Printf("DSigma( s, tmax, p ) = %e\n", DSigma2(s, tmax, p))
+	fmt.Printf("DSigma( s, tmax, p ) =  %e\n", DSigma(s, tmax, p))
+	fmt.Printf("DSigma2( s, tmax, p ) = %e\n", DSigma2(s, tmax, p))
+
+	// Integrate the diff. cross section
 	sigma, error = integrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, 3000000)
-	sigma *=  CrossSectionToPb// Convert 1/GeV^2 in pb
+	sigma *= CrossSectionToPb // Convert 1/GeV^2 in pb
 	error *= CrossSectionToPb
 	return
 }

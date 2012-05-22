@@ -108,8 +108,18 @@ func main() {
 		s := 14000.0*14000.0
 		I, error := physics.Sigma( s, p )
 
-		fmt.Printf("%f\t%f\t%e\t%e\n", p.M_i, p.M_j,I, error)
+		fmt.Printf("m_chi_0 = %8.3f\tm_chi_+ = %8.3f\tsigma = %8.3f +- %8.3f pb\n", p.M_i, p.M_j,I, error)
 	/*}*/
+	/*file, err := os.Create("ds.dat")
+	if err != nil {
+		fmt.Printf( "Error: %s\n", err )
+		return
+	}
+	defer file.Close()
+	for i := 0; i < 30; i++ {
+		t := -1.0 + float64(i)*2.0/30.0
+		fmt.Fprintf( file, "%e\t%e\t%e\n", t, physics.DSigma( s, t, p ), physics.DSigma2( s, t, p) )
+	}*/
 	
 	/*tmin := physics.Mandelstam_t( math.Pi, s, p.M_i, p.M_j )
 	tmax := physics.Mandelstam_t( 0.0, s, p.M_i,p.M_j )

@@ -178,10 +178,10 @@ type Parameter struct {
 
 func NewParameter(m12 float64) *Parameter {
 	susy := &SUSY{
-		Mu:       277.0,
+		Mu:       278.0,
 		M_squark: 352,
-		M_bino:   61.00,
-		M_wino:   122.2,
+		M_bino:   62.00,
+		M_wino:   123.0,
 		TanBeta:  4.0,
 	}
 	M_chargino := CharginoMassMatrix(susy)
@@ -219,6 +219,9 @@ func NewParameter(m12 float64) *Parameter {
 	// Rewrite previously calculated matrices in this notation
 	U = U.Transposed()
 	V, _ = V.Inverted()
+	
+	fmt.Printf("U = \n%s\n", U.MultilineString())
+	fmt.Printf("V = \n%s\n", V.MultilineString())
 
 	m_i := evc[1]    // mass of chi_2^0
 	m_j := values[0] // mass of chi_1^+
@@ -289,15 +292,15 @@ func M2(s, cos_theta float64, p *Parameter) float64 {
 	// t channel
 	tt := 1.0 / t_q / t_q * p.A_L_t * p.A_L_t * p.A_L_Chargino * p.A_L_Chargino * t_i * t_j
 	// u channel
-	uu := 1.0 / u_q / u_q * p.A_L_u * p.A_L_u * p.A_L_c_Chargino * p.A_L_c_Chargino * t_i * t_j
+	uu := 1.0 / u_q / u_q * p.A_L_u * p.A_L_u * p.A_L_c_Chargino * p.A_L_c_Chargino * u_i * u_j
 
 	// interference terms
 	ts := 2.0 / t_q / s_q * (l*p.L*p.M_i*p.M_j*s + l*p.R*t_i*t_j) * p.A_L_t * p.A_L_Chargino
 	us := 2.0 / u_q / s_q * (l*p.L*u_i*u_j + p.M_i*p.M_j*p.R*l*s) * (p.A_L_c_Chargino * p.A_L_u)
 	tu := 2.0 / t_q / u_q * p.M_i * p.M_j * s * p.A_L_t * p.A_L_u * p.A_L_Chargino * p.A_L_c_Chargino
 
-	return (0.5*ss + 16.0*tt + 16.0*uu + 4.0*ts - 4.0*us - 16.0*tu)
-	//return ss + tt + uu + ts - us - tu
+	//return (0.5*ss + 16.0*tt + 16.0*uu + 4.0*ts - 4.0*us - 16.0*tu)
+	return (ss + tt + uu + ts - us - tu)/2.0
 }
 
 func DSigma2(s, cos_theta float64, p *Parameter) float64 {
@@ -392,8 +395,8 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 		if h == 0.0 {
 			return 0.0
 		}
-		// refactorizing scale for the pdfs. 
-		Q := 1000.0
+		// factorization scale for the pdfs. 
+		Q := 464.649
 		// get values of pdfs
 		fu_x1 := pdf.Xfx(x1, Q, pdf.UQuark) / x1
 		fd_x2 := pdf.Xfx(x2, Q, pdf.DBarQuark) / x2

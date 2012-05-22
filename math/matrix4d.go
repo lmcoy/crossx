@@ -478,6 +478,6 @@ func (M *Matrix4) SwapRows(i, j int) {
 
 // MultilineString returns a string representation of M where every row is in a new line.
 func (M *Matrix4) MultilineString() string {
-	return fmt.Sprintf("( %8.3f %8.3f %8.3f %8.3f )\n( %8.3f %8.3f %8.3f %8.3f )\n( %8.3f %8.3f %8.3f %8.3f )\n( %8.3f %8.3f %8.3f %8.3f )",
+	return fmt.Sprintf("( %8.5f %8.5f %8.5f %8.5f )\n( %8.5f %8.5f %8.5f %8.5f )\n( %8.5f %8.5f %8.5f %8.5f )\n( %8.5f %8.5f %8.5f %8.5f )",
 		M[0], M[4], M[8], M[12], M[1], M[5], M[9], M[13], M[2], M[6], M[10], M[14], M[3], M[7], M[11], M[15])
 }

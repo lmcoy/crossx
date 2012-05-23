@@ -330,8 +330,8 @@ func DSigma2(s, cos_theta float64, p *Parameter) float64 {
 	Q_LL := 1.0 / Sw2 / math.Sqrt2 * ((N22*p.V.At(0, 0)-N24*p.V.At(0, 1)/math.Sqrt2)/s_q +
 		+p.V.At(0, 0)/cw*(N21*(2.0/3.0-0.5)*sw+N22*0.5*cw)/u_q)
 
-	Q_LR := 1.0 / Sw2 / math.Sqrt2 * ((N22*p.U.At(0, 0)+N23*p.U.At(0, 1)/math.Sqrt2)/s_q +
-		+p.U.At(0, 0)/cw*(N21*(-1/3.0+0.5)*sw+N22*(-0.5)*cw)/t_q)
+	Q_LR := 1.0 / Sw2 / math.Sqrt2 * ((N22*p.U.At(0, 0)+N23*p.U.At(0, 1)/math.Sqrt2)/s_q -
+		p.U.At(0, 0)/cw*(N21*(-1/3.0+0.5)*sw+N22*(-0.5)*cw)/t_q)
 
 	m3 := p.M_i
 	m4 := p.M_j

@@ -28,8 +28,8 @@ const (
 const (
 	// sin(𝜃w)^2
 	Sw2 = 0.2312
-	//Alpha = 1.0 / 127.934
-	Alpha = 1.0 / 137.0
+	Alpha = 1.0 / 127.934
+	//Alpha = 1.0 / 137.0
 	// Z boson mass
 	Mz = 91.1876 * GeV
 	// W boson mass
@@ -299,8 +299,8 @@ func M2(s, cos_theta float64, p *Parameter) float64 {
 	us := 2.0 / u_q / s_q * (l*p.L*u_i*u_j + p.M_i*p.M_j*p.R*l*s) * (p.A_L_c_Chargino * p.A_L_u)
 	tu := 2.0 / t_q / u_q * p.M_i * p.M_j * s * p.A_L_t * p.A_L_u * p.A_L_Chargino * p.A_L_c_Chargino
 
-	//return (0.5*ss + 16.0*tt + 16.0*uu + 4.0*ts - 4.0*us - 16.0*tu)
-	return (ss + tt + uu + ts - us - tu)/2.0
+	//return (0.5*ss + 16.0*tt + 16.0*uu + 4.0*ts - 4.0*us - 16.0*tu)/5.0
+	return (0.5*ss + tt + uu + ts - us - tu)
 }
 
 func DSigma2(s, cos_theta float64, p *Parameter) float64 {
@@ -396,7 +396,7 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 			return 0.0
 		}
 		// factorization scale for the pdfs. 
-		Q := 464.649
+		Q :=300.0
 		// get values of pdfs
 		fu_x1 := pdf.Xfx(x1, Q, pdf.UQuark) / x1
 		fd_x2 := pdf.Xfx(x2, Q, pdf.DBarQuark) / x2

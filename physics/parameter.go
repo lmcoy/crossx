@@ -9,11 +9,12 @@ import (
 )
 
 type SUSY struct {
-	Mu       float64
-	TanBeta  float64
-	M_squark float64
-	M_bino   float64
-	M_wino   float64
+	Mu      float64
+	TanBeta float64
+	M_su    float64
+	M_sd    float64
+	M_bino  float64
+	M_wino  float64
 }
 
 const (
@@ -27,7 +28,7 @@ const (
 
 const (
 	// sin(𝜃w)^2
-	Sw2 = 0.2312
+	Sw2   = 0.2312
 	Alpha = 1.0 / 127.934
 	//Alpha = 1.0 / 137.0
 	// Z boson mass
@@ -176,13 +177,14 @@ type Parameter struct {
 	A_L_u          float64
 }
 
-func NewParameter(m12 float64) *Parameter {
+func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su float64, M_sd float64) *Parameter {
 	susy := &SUSY{
-		Mu:       278.0,
-		M_squark: 352,
-		M_bino:   62.00,
-		M_wino:   123.0,
-		TanBeta:  4.0,
+		Mu:      mu,
+		M_su:    M_su,
+		M_sd:    M_sd,
+		M_bino:  M1,
+		M_wino:  M2,
+		TanBeta: tan_beta,
 	}
 	M_chargino := CharginoMassMatrix(susy)
 	M_neutralino := NeutralinoMassMatrix(susy)
@@ -208,18 +210,51 @@ func NewParameter(m12 float64) *Parameter {
 	//------------------------------------
 
 	// Print debug messages
-	fmt.Printf("N = \n%s\n", N.MultilineString())
+	/*fmt.Printf("N = \n%s\n", N.MultilineString())
 	fmt.Printf("N.M.N^T =\n%s\n", N.Transposed().Times(M_neutralino).Times(N).MultilineString())
 
 	fmt.Printf("U = \n%s\n", U.MultilineString())
 	fmt.Printf("V = \n%s\n", V.MultilineString())
-	fmt.Printf("U^T.M.V =\n%s\n", U.Transposed().Times(M_chargino).Times(V).MultilineString())
+	fmt.Printf("U^T.M.V =\n%s\n", U.Transposed().Times(M_chargino).Times(V).MultilineString())*/
 
 	// Formular for chargino mass matrix diagonalization: U*.M.V^{-1}
 	// Rewrite previously calculated matrices in this notation
 	U = U.Transposed()
 	V, _ = V.Inverted()
+
+	N.Set(0, 0, 9.86364430E-01)
+	N.Set(0, 1, -5.31103553E-02)
+	N.Set(0, 2, 1.46433995E-01)
+	N.Set(0, 3, -5.31186117E-02)
+	N.Set(1, 0, 9.93505358E-02)
+	N.Set(1, 1, 9.44949299E-01)
+	N.Set(1, 2, -2.69846720E-01)
+	N.Set(1, 3, 1.56150698E-01)
+	N.Set(2, 0, -6.03388002E-02)
+	N.Set(2, 1, 8.77004854E-02)
+	N.Set(2, 2, 6.95877493E-01)
+	N.Set(2, 3, 7.10226984E-01)
+	N.Set(3, 0, -1.16507132E-01)
+	N.Set(3, 1, 3.10739017E-01)
+	N.Set(3, 2, 6.49225960E-01)
+	N.Set(3, 3, -6.84377823E-01)
 	
+	fmt.Printf("N.M.N^T =\n%s\n", N.Times(M_neutralino).Times(N.Transposed()).MultilineString())
+
+	U.Set(0, 0, 9.16834859E-01)
+	U.Set(0, 1, -3.99266629E-01)
+	U.Set(1, 0, 3.99266629E-01)
+	U.Set(1, 1, 9.16834859E-01)
+	
+
+	V.Set(0, 0, 9.72557835E-01)
+	V.Set(0, 1, -2.32661249E-01)
+	V.Set(1, 0, 2.32661249E-01)
+	V.Set(1, 1, 9.72557835E-01)
+	
+	fmt.Printf("V.M.U^T =\n%s\n", V.Times(M_chargino).Times(U.Transposed()).MultilineString())
+	fmt.Printf("U.M.V^T =\n%s\n", U.Times(M_chargino).Times(V.Transposed()).MultilineString())
+
 	fmt.Printf("U = \n%s\n", U.MultilineString())
 	fmt.Printf("V = \n%s\n", V.MultilineString())
 
@@ -240,22 +275,22 @@ func NewParameter(m12 float64) *Parameter {
 	A_L_u := A_L(i, 2.0/3.0, 1.0/2.0, N)
 
 	// Print debug informations
-	fmt.Printf("L = %f\n", L)
+	/*fmt.Printf("L = %f\n", L)
 	fmt.Printf("R = %f\n", R)
 	fmt.Printf("A_L_t = %f\n", A_L_t)
 	fmt.Printf("A_L_u = %f\n", A_L_u)
 	fmt.Printf("A_L_Chargino = %f\n", A_L_Chargino)
-	fmt.Printf("A_L_c_Chargino = %f\n", A_L_c_Chargino)
+	fmt.Printf("A_L_c_Chargino = %f\n", A_L_c_Chargino)*/
 
 	return &Parameter{
 		Susy:           susy,
 		M_chargino:     M_chargino,
 		M_neutralino:   M_neutralino,
 		N:              N,
-		U:              U,
-		V:              V,
-		M_i:            m_i,
-		M_j:            m_j,
+		U:              V,
+		V:              U,
+		M_i:            1.81088157E+02/*m_i*/,
+		M_j:            1.81696474E+02/*m_j*/,
 		L:              L,
 		R:              R,
 		A_L_Chargino:   A_L_Chargino,
@@ -279,8 +314,8 @@ func M2(s, cos_theta float64, p *Parameter) float64 {
 	u_j := u - p.M_j*p.M_j
 	t_j := t - p.M_j*p.M_j
 
-	t_q := t - p.Susy.M_squark*p.Susy.M_squark
-	u_q := u - p.Susy.M_squark*p.Susy.M_squark
+	t_q := t - p.Susy.M_sd*p.Susy.M_sd
+	u_q := u - p.Susy.M_su*p.Susy.M_su
 	s_q := s - Mw*Mw
 
 	l2 := l * l
@@ -300,7 +335,7 @@ func M2(s, cos_theta float64, p *Parameter) float64 {
 	tu := 2.0 / t_q / u_q * p.M_i * p.M_j * s * p.A_L_t * p.A_L_u * p.A_L_Chargino * p.A_L_c_Chargino
 
 	//return (0.5*ss + 16.0*tt + 16.0*uu + 4.0*ts - 4.0*us - 16.0*tu)/5.0
-	return (0.5*ss + tt + uu + ts - us - tu)
+	return 0.5*ss + tt + uu + ts - us - tu
 }
 
 func DSigma2(s, cos_theta float64, p *Parameter) float64 {
@@ -315,8 +350,8 @@ func DSigma2(s, cos_theta float64, p *Parameter) float64 {
 	u_j := u - p.M_j*p.M_j
 	t_j := t - p.M_j*p.M_j
 
-	t_q := t - p.Susy.M_squark*p.Susy.M_squark
-	u_q := u - p.Susy.M_squark*p.Susy.M_squark
+	t_q := t - p.Susy.M_sd*p.Susy.M_sd
+	u_q := u - p.Susy.M_su*p.Susy.M_su
 	s_q := s - Mw*Mw
 
 	// Prefetch values of N
@@ -384,8 +419,6 @@ func DSigma(s, cos𝜃 float64, p *Parameter) float64 {
 // 	p: SUSY parameter
 func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 	tau := (p.M_i + p.M_j) * (p.M_i + p.M_j)
-	fmt.Printf("tau = %f\n", tau)
-	fmt.Printf("xfx = %f\n", pdf.Xfx(0.5, 200, pdf.UQuark))
 
 	Integrand := func(x1, x2, t float64) float64 {
 		// minimal value of s: 
@@ -396,7 +429,7 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 			return 0.0
 		}
 		// factorization scale for the pdfs. 
-		Q :=300.0
+		Q := 1000.0
 		// get values of pdfs
 		fu_x1 := pdf.Xfx(x1, Q, pdf.UQuark) / x1
 		fd_x2 := pdf.Xfx(x2, Q, pdf.DBarQuark) / x2
@@ -404,7 +437,6 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 		fd_x1 := pdf.Xfx(x1, Q, pdf.DBarQuark) / x1
 
 		return (fu_x1*fd_x2 + fd_x1*fu_x2) * DSigma2(x1*x2*s, t, p)
-		//return DSigma3(s,t, p)
 	}
 
 	// Integrate over cos𝜃 = -1..1

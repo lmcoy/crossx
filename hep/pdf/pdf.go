@@ -1,3 +1,6 @@
+// Package pdf provides parton distribution functions.
+//
+// This package is a simple go binding to http://lhapdf.hepforge.org/
 package pdf
 
 // #cgo LDFLAGS: -lpdf -lstdc++ -L/usr/local/lib -lLHAPDF

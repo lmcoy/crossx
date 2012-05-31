@@ -1,4 +1,4 @@
-// The package lhe provides a reader for les houches files in particle physics.
+// Package lhe provides a reader for les houches files in particle physics.
 package lhe
 
 import (
@@ -36,7 +36,7 @@ type File struct {
 	blocks      map[string]Block
 }
 
-// NewFile creates a new File.
+// NewFile creates a new File object.
 func NewFile() *File {
 	return &File{
 		block_cmds: make(map[string]ReadDataFn),

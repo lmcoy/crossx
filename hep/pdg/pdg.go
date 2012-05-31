@@ -1,9 +1,9 @@
 // The package pdg contains particle data from http://pdg.lbl.gov/
 package pdg
 
-// PDG codes for particles
-// anti particles are denoted with a minus, e.g. anti d quark: -DQuark
 const (
+	// PDG codes for particles
+	// anti particles are denoted with a minus, e.g. anti d quark: -DQuark
 	// Quarks
 	DQuark = 1
 	UQuark = 2

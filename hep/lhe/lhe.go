@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"physics/math"
+	"physics/math/linalg"
 	"strconv"
 	"strings"
 )
@@ -131,7 +131,7 @@ func readMatrixElement(line string) (melem matrixElement, err error) {
 }
 
 func ReadMatrix4(lhe *File) (interface{}, error) {
-	matrix = math3d.NewMatrix4()
+	matrix := linalg.NewMatrix4()
 	for {
 		line := lhe.readLine()
 		if line[0] != ' ' {
@@ -259,17 +259,3 @@ func (lhe *File) ReadFromFile(path string) (*Data, error) {
 		Blocks: lhe.blocks,
 	}, nil
 }
-
-/*func main() {
-	lhe := NewFile()
-	lhe.AddBlockCmd("mass", ReadList)
-	lhe.AddBlockCmd("minpar", ReadList)
-	data, err := lhe.ReadFromFile("test.lhe")
-	if err != nil {
-		fmt.Printf("%v\n", err)
-		return
-	}
-
-	fmt.Printf("%v\n", data.Blocks)
-	//fmt.Printf( "%v\n", lhe.blocks["mass"] )
-}*/

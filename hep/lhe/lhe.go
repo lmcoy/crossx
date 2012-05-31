@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"physics/math"
 	"strconv"
 	"strings"
 )
@@ -107,53 +108,45 @@ func (lhe *File) unreadLine() bool {
 	return false
 }
 
-/*func readMatrixElement( line string ) (melem matrixElement, err error) {
-	if line[0] != ' ' {
-		return melem, fmt.Errorf( "' ' expected as first character in a line with a matrix element but got %c", line[0] )
-	}
+func readMatrixElement(line string) (melem matrixElement, err error) {
 	tokens := strings.Fields(line)
 	if len(tokens) != 3 {
-		return melem, fmt.Errorf( "expected format for a matrix element \"row column value\"." )
+		return melem, fmt.Errorf("expected format for a matrix element \"row column value\".")
 	}
 	var row, column int64
 	var value float64
-	if row, err = strconv.ParseInt(tokens[0], 10, 32 ); err != nil {
-		return melem, fmt.Errorf( "unable to parse row number: %s", err )
+	if row, err = strconv.ParseInt(tokens[0], 10, 32); err != nil {
+		return melem, fmt.Errorf("unable to parse row number: %s", err)
 	}
-	if column, err = strconv.ParseInt(tokens[1], 10, 32 ); err != nil {
-		return melem, fmt.Errorf( "unable to parse column number: %s", err )
+	if column, err = strconv.ParseInt(tokens[1], 10, 32); err != nil {
+		return melem, fmt.Errorf("unable to parse column number: %s", err)
 	}
-	if value, err = strconv.ParseFloat(tokens[2], 64 ); err != nil {
-		return melem, fmt.Errorf( "unable to parse value: %s", err )
+	if value, err = strconv.ParseFloat(tokens[2], 64); err != nil {
+		return melem, fmt.Errorf("unable to parse value: %s", err)
 	}
-	melem.row = int(row)
-	melem.column = int(column)
+	melem.row = int(row) - 1
+	melem.column = int(column) - 1
 	melem.value = value
 	return
 }
 
-func ReadNMixBlock( r io.Reader ) (nmix *NMixBlock, err error) {
-	nmix = math3d.NewMatrix4()
-	isSet := [4][4]int
-	for i := 0; i < 16; i++ {
-		line := readLine(r)
-		melem, err := readMatrixElement( line )
+func ReadMatrix4(lhe *File) (interface{}, error) {
+	matrix = math3d.NewMatrix4()
+	for {
+		line := lhe.readLine()
+		if line[0] != ' ' {
+			lhe.unreadLine()
+			break
+		}
+
+		melem, err := readMatrixElement(line)
 		if err != nil {
 			return nil, err
 		}
-		row := melem.row-1
-		column := melem.column-1
-		if row < 0 || row > 3 || column < 0 || column > 3 {
-			return nil, fmt.Errorf( "not a valid matrix element: %d, %d", row, column )
-		}
-		if isSet[row][column] == 1 {
-			return nil, fmt.Errorf( "matrix element %d, %d alread set", row, column )
-		}
-		nmix.Set(row, column, melem.value)
-		isSet[row, column] = 1
+		matrix.Set(melem.row, melem.column, melem.value)
 	}
-	return
-}*/
+	return matrix, nil
+}
 
 // readListElement returns from a line formated like "id(int)   value(float64)" both values.
 func readListElement(line string) (id int, value float64, err error) {

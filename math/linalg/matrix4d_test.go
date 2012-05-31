@@ -1,4 +1,4 @@
-package math3d
+package linalg
 
 import (
 	"math/rand"

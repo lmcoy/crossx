@@ -1,11 +1,11 @@
-package physics
+package hep
 
 import (
 	"fmt"
 	"math"
-	"physics/math"
+	"physics/hep/pdf"
+	"physics/math/linalg"
 	"physics/math/mcintegrator"
-	"physics/physics/pdf"
 )
 
 type SUSY struct {
@@ -27,7 +27,7 @@ const (
 )
 
 const (
-	// sin(𝜃w)^2
+	// sin(𝜃w)²
 	Sw2   = 0.2312
 	Alpha = 1.0 / 127.934
 	//Alpha = 1.0 / 137.0
@@ -54,8 +54,8 @@ const (
 // 	(    0,    M_wino,     cos(𝛽)*cw*Mz,  -sin(𝛽)*cw*Mz )
 // 	(    *,       *,             0,             -µ      )
 // 	(    *,       *,            -µ,              0      )
-func NeutralinoMassMatrix(susy *SUSY) (m *math3d.Matrix4) {
-	m = math3d.NewMatrix4()
+func NeutralinoMassMatrix(susy *SUSY) (m *linalg.Matrix4) {
+	m = linalg.NewMatrix4()
 	sw := math.Sqrt(Sw2)
 	cw := math.Cos(math.Asin(sw))
 	sb := math.Sin(math.Atan(susy.TanBeta))
@@ -89,8 +89,8 @@ func NeutralinoMassMatrix(susy *SUSY) (m *math3d.Matrix4) {
 //	M =
 // 	( M_wino,        √2*Mw*cos(𝛽) )
 // 	( √2*Mw*sin(𝛽),       µ       )
-func CharginoMassMatrix(susy *SUSY) (m *math3d.Matrix2) {
-	m = math3d.NewMatrix2()
+func CharginoMassMatrix(susy *SUSY) (m *linalg.Matrix2) {
+	m = linalg.NewMatrix2()
 	sb := math.Sin(math.Atan(susy.TanBeta))
 	cb := math.Cos(math.Atan(susy.TanBeta))
 
@@ -101,17 +101,17 @@ func CharginoMassMatrix(susy *SUSY) (m *math3d.Matrix2) {
 	return
 }
 
-func A_L_Chargino(j int, U *math3d.Matrix2) float64 {
+func A_L_Chargino(j int, U *linalg.Matrix2) float64 {
 	sw := math.Sqrt(Sw2)
 	return 1.0 / math.Sqrt2 * U.At(j, 0) / sw
 }
 
-func A_L_c_Chargino(j int, V *math3d.Matrix2) float64 {
+func A_L_c_Chargino(j int, V *linalg.Matrix2) float64 {
 	sw := math.Sqrt(Sw2)
 	return 1.0 / math.Sqrt2 * V.At(j, 0) / sw
 }
 
-func A_L(i int, q, T3 float64, N *math3d.Matrix4) float64 {
+func A_L(i int, q, T3 float64, N *linalg.Matrix4) float64 {
 	sw := math.Sqrt(Sw2)
 	cw := math.Cos(math.Asin(sw))
 
@@ -122,7 +122,7 @@ func A_L(i int, q, T3 float64, N *math3d.Matrix4) float64 {
 	return (sw*q*Ni1 + 1.0/cw*Ni2*(T3-q*Sw2)) / sw
 }
 
-func L(i, j int, N *math3d.Matrix4, V *math3d.Matrix2) float64 {
+func L(i, j int, N *linalg.Matrix4, V *linalg.Matrix2) float64 {
 	sw := math.Sqrt(Sw2)
 	cw := math.Cos(math.Asin(sw))
 
@@ -134,7 +134,7 @@ func L(i, j int, N *math3d.Matrix4, V *math3d.Matrix2) float64 {
 	return 1.0 / math.Sqrt2 / sw * (Ni4*V.At(j, 1) - math.Sqrt2*(sw*Ni1+cw*Ni2)*V.At(j, 0))
 }
 
-func R(i, j int, N *math3d.Matrix4, U *math3d.Matrix2) float64 {
+func R(i, j int, N *linalg.Matrix4, U *linalg.Matrix2) float64 {
 	sw := math.Sqrt(Sw2)
 	cw := math.Cos(math.Asin(sw))
 
@@ -162,11 +162,11 @@ func Mandelstam_t(cos_theta, s, m3, m4 float64) float64 {
 
 type Parameter struct {
 	Susy           *SUSY
-	M_chargino     *math3d.Matrix2 // Chargino mass matrix (not diagonal)
-	M_neutralino   *math3d.Matrix4 // Neutralino mass matrix (not diagonal)
-	N              *math3d.Matrix4 // Matrix for diagonalizing the neutralino mass matrix via N^T.M.N
-	U              *math3d.Matrix2
-	V              *math3d.Matrix2
+	M_chargino     *linalg.Matrix2 // Chargino mass matrix (not diagonal)
+	M_neutralino   *linalg.Matrix4 // Neutralino mass matrix (not diagonal)
+	N              *linalg.Matrix4 // Matrix for diagonalizing the neutralino mass matrix via N^T.M.N
+	U              *linalg.Matrix2
+	V              *linalg.Matrix2
 	M_i            float64
 	M_j            float64
 	L              float64
@@ -222,36 +222,35 @@ func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su flo
 	U = U.Transposed()
 	V, _ = V.Inverted()
 
-	N.Set(0, 0, 9.86364430E-01)
-	N.Set(0, 1, -5.31103553E-02)
-	N.Set(0, 2, 1.46433995E-01)
-	N.Set(0, 3, -5.31186117E-02)
-	N.Set(1, 0, 9.93505358E-02)
-	N.Set(1, 1, 9.44949299E-01)
-	N.Set(1, 2, -2.69846720E-01)
-	N.Set(1, 3, 1.56150698E-01)
-	N.Set(2, 0, -6.03388002E-02)
-	N.Set(2, 1, 8.77004854E-02)
-	N.Set(2, 2, 6.95877493E-01)
-	N.Set(2, 3, 7.10226984E-01)
-	N.Set(3, 0, -1.16507132E-01)
-	N.Set(3, 1, 3.10739017E-01)
-	N.Set(3, 2, 6.49225960E-01)
-	N.Set(3, 3, -6.84377823E-01)
-	
+	N.Set(0, 0, 9.92797628E-01)
+	N.Set(0, 1, -3.04145381E-02)
+	N.Set(0, 2, 1.09080644E-01)
+	N.Set(0, 3, -3.91054708E-02)
+	N.Set(1, 0, 5.84996523E-02)
+	N.Set(1, 1, 9.66019640E-01)
+	N.Set(1, 2, -2.17829192E-01)
+	N.Set(1, 3, 1.26231093E-01)
+	N.Set(2, 0, -4.69368399E-02)
+	N.Set(2, 1, 6.81242959E-02)
+	N.Set(2, 2, 7.00360055E-01)
+	N.Set(2, 3, 7.08979412E-01)
+	N.Set(3, 0, -9.34215858E-02)
+	N.Set(3, 1, 2.47467354E-01)
+	N.Set(3, 2, 6.70930436E-01)
+	N.Set(3, 3, -6.92737083E-01)
+
 	fmt.Printf("N.M.N^T =\n%s\n", N.Times(M_neutralino).Times(N.Transposed()).MultilineString())
 
-	U.Set(0, 0, 9.16834859E-01)
-	U.Set(0, 1, -3.99266629E-01)
-	U.Set(1, 0, 3.99266629E-01)
-	U.Set(1, 1, 9.16834859E-01)
-	
+	U.Set(0, 0, 9.48909352E-01)
+	U.Set(0, 1, -3.15548795E-01)
+	U.Set(1, 0, 3.15548795E-01)
+	U.Set(1, 1, 9.48909352E-01)
 
-	V.Set(0, 0, 9.72557835E-01)
-	V.Set(0, 1, -2.32661249E-01)
-	V.Set(1, 0, 2.32661249E-01)
-	V.Set(1, 1, 9.72557835E-01)
-	
+	V.Set(0, 0, 9.83010683E-01)
+	V.Set(0, 1, -1.83548349E-01)
+	V.Set(1, 0, 1.83548349E-01)
+	V.Set(1, 1, 9.83010683E-01)
+
 	fmt.Printf("V.M.U^T =\n%s\n", V.Times(M_chargino).Times(U.Transposed()).MultilineString())
 	fmt.Printf("U.M.V^T =\n%s\n", U.Times(M_chargino).Times(V.Transposed()).MultilineString())
 
@@ -287,10 +286,10 @@ func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su flo
 		M_chargino:     M_chargino,
 		M_neutralino:   M_neutralino,
 		N:              N,
-		U:              V,
-		V:              U,
-		M_i:            1.81088157E+02/*m_i*/,
-		M_j:            1.81696474E+02/*m_j*/,
+		U:              U,
+		V:              V,
+		M_i:            2.35046162E+02, /*m_i*/
+		M_j:            2.37406034E+02, /*m_j*/
 		L:              L,
 		R:              R,
 		A_L_Chargino:   A_L_Chargino,
@@ -429,7 +428,7 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 			return 0.0
 		}
 		// factorization scale for the pdfs. 
-		Q := 1000.0
+		Q := 300.0
 		// get values of pdfs
 		fu_x1 := pdf.Xfx(x1, Q, pdf.UQuark) / x1
 		fd_x2 := pdf.Xfx(x2, Q, pdf.DBarQuark) / x2

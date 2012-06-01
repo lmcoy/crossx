@@ -1,3 +1,4 @@
+// Package integrator provides functions for Monte Carlo Integration.
 package integrator
 
 import (
@@ -9,29 +10,40 @@ type Integrator interface {
 	Integrate( func(float64)float64, float64, float64, int ) (float64, float64)
 }
 
+// Random represents a random number generator.
 type Random interface {
+	// Distribution of the random number generator.
 	Distribution( float64 ) float64
+	// Generates random numbers.
 	Rand() float64
 }
 
+// Uniform generates uniformly distributed random numbers in [A,B]
 type Uniform struct {
-	a,b float64
+	A,B float64
 }
 
+// Distribution returns the value of the uniform probabiltiy distribution at x.
+//
+// 	f(x) = 1.0/(B-A) for x in [A,B] otherwise 0
 func (u *Uniform) Distribution( x float64 ) float64 {
-	if x >= u.a && x < u.b {
-		return 1.0/(u.b-u.a)
+	if x >= u.A && x < u.B {
+		return 1.0/(u.B-u.A)
 	}
 	return 0.0
 }
 
+// Rand returns uniformly distributed random numbers in the interval [A,B]
 func (u *Uniform) Rand() float64 {
-	return (u.b-u.a)*rand.Float64()+u.a
+	return (u.B-u.A)*rand.Float64()+u.A
 }
 
+// Integrate integrates the 1-dimensional function between a and b with Monte Carlo methods.
+//
+// This function uses N uniformly distributed random numbers to perform the integration.
 func Integrate( f func(float64)float64, a, b float64, N int ) (I float64, error float64) {
 	I2 := 0.0
-	uniform := &Uniform{ a: a, b: b }
+	uniform := &Uniform{ A: a, B: b }
 	// Integral ausrechnen mit:
         // I = (b-a)/N*sum_{i=1}^{N} f(x_i),
         // wobei x_i gleichverteilte Zufallszahlen im Intervall [a,b) sind.
@@ -51,9 +63,9 @@ func Integrate( f func(float64)float64, a, b float64, N int ) (I float64, error 
 
 func Integrate3( f func(float64,float64,float64) float64, lower []float64, upper []float64, N int ) (I float64, error float64) {
 	I2 := 0.0
-	uniform1 := &Uniform{ a: lower[0], b: upper[0] }
-	uniform2 := &Uniform{ a: lower[1], b: upper[1] }
-	uniform3 := &Uniform{ a: lower[2], b: upper[2] }
+	uniform1 := &Uniform{ A: lower[0], B: upper[0] }
+	uniform2 := &Uniform{ A: lower[1], B: upper[1] }
+	uniform3 := &Uniform{ A: lower[2], B: upper[2] }
 	
 	for i := 0; i < N; i++ {
 		x := uniform1.Rand()

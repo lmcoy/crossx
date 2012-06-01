@@ -1,5 +1,14 @@
 // Package lhe provides a reader for les houches files in particle physics.
+//
 package lhe
+
+
+
+// BUG(lo): At the moment only "block" statements are supported.
+
+// BUG(lo): Additional parameter to a block statement like in
+//	BLOCK HMIX Q=  1.09862507E+03
+// are ignored.
 
 import (
 	"bufio"
@@ -142,6 +151,36 @@ func ReadMatrix4(lhe *File) (interface{}, error) {
 		melem, err := readMatrixElement(line)
 		if err != nil {
 			return nil, err
+		}
+		if melem.row > 3 || melem.row < 0 {
+			return nil, fmt.Errorf( "matrix index invalid for a 4x4 matrix. row = %d, expected 0..3", melem.row )
+		}
+		if melem.column > 3 || melem.column < 0 {
+			return nil, fmt.Errorf( "matrix index invalid for a 4x4 matrix. column = %d, expected 0..3", melem.column )
+		}
+		matrix.Set(melem.row, melem.column, melem.value)
+	}
+	return matrix, nil
+}
+
+func ReadMatrix2(lhe *File) (interface{}, error) {
+	matrix := linalg.NewMatrix2()
+	for {
+		line := lhe.readLine()
+		if line[0] != ' ' {
+			lhe.unreadLine()
+			break
+		}
+
+		melem, err := readMatrixElement(line)
+		if err != nil {
+			return nil, err
+		}
+		if melem.row > 1 || melem.row < 0 {
+			return nil, fmt.Errorf( "matrix index invalid for a 2x2 matrix. row = %d, expected 0..1", melem.row )
+		}
+		if melem.column > 1 || melem.column < 0 {
+			return nil, fmt.Errorf( "matrix index invalid for a 2x2 matrix. column = %d, expected 0..1", melem.column )
 		}
 		matrix.Set(melem.row, melem.column, melem.value)
 	}

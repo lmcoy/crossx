@@ -6,6 +6,8 @@ import (
 	"physics/hep/pdf"
 	"physics/math/linalg"
 	"physics/math/mcintegrator"
+	"physics/hep/pdg"
+	"physics/hep/lhe"
 )
 
 type SUSY struct {
@@ -176,6 +178,60 @@ type Parameter struct {
 	A_L_t          float64
 	A_L_u          float64
 }
+
+func NewParameterFromLheFile( path string ) (*Parameter,error) {
+	lfile := lhe.NewFile()
+	lfile.AddBlockCmd("mass", lhe.ReadList)
+	lfile.AddBlockCmd("nmix", lhe.ReadMatrix4)
+	lfile.AddBlockCmd("umix", lhe.ReadMatrix2)
+	lfile.AddBlockCmd("vmix", lhe.ReadMatrix2)
+	data, err := lfile.ReadFromFile(path)
+	if err != nil {
+		return nil,err
+	}
+
+	tmp, ok := data.Blocks["mass"]
+	if ok != true {
+		return nil, fmt.Errorf( "no mass block in file: %s", path )
+	}
+	masses := tmp.(map[int]float64)
+	
+	
+	N := data.Blocks["nmix"].(*linalg.Matrix4)
+	U := data.Blocks["umix"].(*linalg.Matrix2)
+	V := data.Blocks["vmix"].(*linalg.Matrix2)
+	
+	i := 1 // use chi_2^0
+	j := 0 // use chi_1^+
+
+	// precalculate values for |M|²
+	L := L(i, j, N, V)
+	R := R(i, j, N, U)
+	A_L_Chargino := A_L_Chargino(j, U)
+	A_L_c_Chargino := A_L_c_Chargino(j, V)
+	A_L_t := A_L(i, -1.0/3.0, -1.0/2.0, N)
+	A_L_u := A_L(i, 2.0/3.0, 1.0/2.0, N)
+	susy := &SUSY{
+		M_su:   masses[pdg.SUQuarkL],
+		M_sd:    masses[pdg.SDQuarkL],
+	}
+	
+	return &Parameter{
+		Susy: susy,
+		N:              N,
+		U:              U,
+		V:              V,
+		M_i:            masses[pdg.Neutralino2],
+		M_j:            masses[pdg.Chargino1],
+		L:              L,
+		R:              R,
+		A_L_Chargino:   A_L_Chargino,
+		A_L_c_Chargino: A_L_c_Chargino,
+		A_L_t:          A_L_t,
+		A_L_u:          A_L_u,
+	},nil
+}
+	
 
 func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su float64, M_sd float64) *Parameter {
 	susy := &SUSY{
@@ -435,7 +491,7 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 		fu_x2 := pdf.Xfx(x2, Q, pdf.UQuark) / x2
 		fd_x1 := pdf.Xfx(x1, Q, pdf.DBarQuark) / x1
 
-		return (fu_x1*fd_x2 + fd_x1*fu_x2) * DSigma2(x1*x2*s, t, p)
+		return (fu_x1*fd_x2 + fd_x1*fu_x2) * DSigma(x1*x2*s, t, p)
 	}
 
 	// Integrate over cos𝜃 = -1..1

@@ -16,15 +16,17 @@ func main() {
 	// init random number generator
 	rand.Seed(time.Now().Unix())
 
-	M1 := 1.01396534E+02
+	/*M1 := 1.01396534E+02
 	M2 := 1.91504241E+02
 	tan_beta := 10.0
 	m_sd := 1.55931152E+03
 	m_su := 1.55431328E+03
-	mu := 3.57680977E+02
-	p := hep.NewParameter(mu, M1, M2, tan_beta, m_su, m_sd)
-	if p == nil {
-		panic("p nil")
+	mu := 3.57680977E+02*/
+	//p := hep.NewParameter(mu, M1, M2, tan_beta, m_su, m_sd)
+	p, e := hep.NewParameterFromLheFile("out/450.lhe")
+	if e != nil {
+		fmt.Printf( "error: %s\n", e )
+		return
 	}
 	s := 14000.0 * 14000.0
 	I, error := hep.Sigma(s, p)

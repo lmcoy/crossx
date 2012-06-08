@@ -7,16 +7,23 @@ package pdf
 // #include "pdf.h"
 import "C"
 
+// BUG(lo): Xfx uses "cteq6mE" as pdfs. The name in Init is not used.
+
+// Type represents a parton type.
 type Type int
 
 const (
+	// Partons
+	// Antiparticles
 	TBarQuark Type = iota - 6
 	BBarQuark
 	CBarQuark
 	SBarQuark
 	UBarQuark
 	DBarQuark
+	// Gauge
 	Gluon
+	// Particles
 	DQuark
 	UQuark
 	SQuark

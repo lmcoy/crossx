@@ -61,6 +61,9 @@ func Integrate( f func(float64)float64, a, b float64, N int ) (I float64, error 
 	return
 }
 
+// Integrate3 integrates a 3d function f(x,y,z) with monte carlo methods.
+//
+// TODO: update interface
 func Integrate3( f func(float64,float64,float64) float64, lower []float64, upper []float64, N int ) (I float64, error float64) {
 	I2 := 0.0
 	uniform1 := &Uniform{ A: lower[0], B: upper[0] }

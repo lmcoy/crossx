@@ -1,8 +1,7 @@
 // Package lhe provides a reader for les houches files in particle physics.
 //
+// See http://arxiv.org/abs/hep-ph/0311123 for more information.
 package lhe
-
-
 
 // BUG(lo): At the moment only "block" statements are supported.
 
@@ -29,12 +28,20 @@ type Data struct {
 	Blocks map[string]Block
 }
 
+// matrixElement represents an element of a matrix
 type matrixElement struct {
 	row    int
 	column int
 	value  float64
 }
 
+// ReadDataFn is a function which reads the data of a block or other lhe structures.
+//
+// A data line should start with a ' '. When a line with no leading space is read
+// the ReadDataFn should unread this line and return what it has read so far.
+//
+// Examples are 
+// 	ReadMatrix4, ReadMatrix2, ReadList.
 type ReadDataFn func(*File) (interface{}, error)
 
 // File reads a les houches file from disk.
@@ -54,6 +61,9 @@ func NewFile() *File {
 }
 
 // AddBlockCmd specifies a function which is called for every line in a block name.
+//
+// Examples for the datafn are
+// 	ReadMatrix2, ReadMatrix4, ReadList
 func (lhe *File) AddBlockCmd(name string, datafn ReadDataFn) {
 	lhe.block_cmds[name] = datafn
 }
@@ -117,6 +127,16 @@ func (lhe *File) unreadLine() bool {
 	return false
 }
 
+// readMatrixElement constructs a matrixElement from line.
+//
+// line should have the format 
+// 	"row column value" 
+// where row and columns are int and value is float64.
+//
+// The returned row and column start with 0, i.e. 1 is subtracted from the read ones.
+//
+// It returns a zero matrixElement (0,0,0.0) and an error if there occurs any error while
+// parsing line.
 func readMatrixElement(line string) (melem matrixElement, err error) {
 	tokens := strings.Fields(line)
 	if len(tokens) != 3 {
@@ -139,11 +159,20 @@ func readMatrixElement(line string) (melem matrixElement, err error) {
 	return
 }
 
+// ReadMatrix4 is a ReadDataFn for reading a linalg.Matrix4 from a lhe-file.
+//
+// It reads all lines with the format
+//	' ' row column value	(additional whitespaces are ignored)
+// from lhe and returns a linalg.Matrix4.
+// row and column are supposed to start with 1 in the lhe file (while
+// in Matrix4 they start with 0.)
+//
+// If any error occurs while parsing the matrix nil,error are returned.
 func ReadMatrix4(lhe *File) (interface{}, error) {
 	matrix := linalg.NewMatrix4()
 	for {
 		line := lhe.readLine()
-		if line[0] != ' ' {
+		if line[0] != ' ' { // a data line must start with ' '
 			lhe.unreadLine()
 			break
 		}
@@ -163,11 +192,17 @@ func ReadMatrix4(lhe *File) (interface{}, error) {
 	return matrix, nil
 }
 
+// ReadMatrix2 is a ReadDataFn for reading a linalg.Matrix2 from a lhe-file.
+// 
+// For more information see ReadMatrix4.
+//
+// It returns a linalg.Matrix2.
+// If any error occurs while parsing the matrix nil,error are returned.
 func ReadMatrix2(lhe *File) (interface{}, error) {
 	matrix := linalg.NewMatrix2()
 	for {
 		line := lhe.readLine()
-		if line[0] != ' ' {
+		if line[0] != ' ' { // a data line must start with ' '
 			lhe.unreadLine()
 			break
 		}
@@ -244,6 +279,7 @@ func (lhe *File) readBlock(para []string) error {
 	if ok == true {
 		data, err = datafn(lhe)
 	} else {
+		// block not recognized => skip its data
 		data, err = skipData(lhe)
 	}
 	if err != nil {

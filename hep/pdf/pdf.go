@@ -33,13 +33,19 @@ const (
 	Photon
 )
 
+type PdfType int
+const (
+	LHGrid PdfType = 0
+	LHPdf PdfType = 1
+)
+
 // Init initalizes the PDFs.
-func Init(name string) {
-	C.InitPDFSet(C.CString("cteq6mE"))
+func Init(name string, typ PdfType) {
+	C.InitPDFSet(C.CString("cteq6l"))
 }
 
 func InitPDF(i int) {
-	C.InitPDF(C.int(i))
+	//C.InitPDF(C.int(i))
 }
 
 // Xfx returns x*f(x,Q) for the parton typ where f is the pdf and Q the factorization scale.

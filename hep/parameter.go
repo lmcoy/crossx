@@ -52,10 +52,10 @@ const (
 // NeutralinoMassMatrix returns the mass matrix for neutralinos with the SUSY parameters in susy.
 //
 // 	mass matrix (symmetric):
-// 	( M_bino,     0,      -cos(𝛽)*sw*Mz,   sin(𝛽)*sw*Mz ) 
-// 	(    0,    M_wino,     cos(𝛽)*cw*Mz,  -sin(𝛽)*cw*Mz )
-// 	(    *,       *,             0,             -µ      )
-// 	(    *,       *,            -µ,              0      )
+// 		( M_bino,     0,      -cos(𝛽)*sw*Mz,   sin(𝛽)*sw*Mz ) 
+// 		(    0,    M_wino,     cos(𝛽)*cw*Mz,  -sin(𝛽)*cw*Mz )
+// 		(    *,       *,             0,             -µ      )
+// 		(    *,       *,            -µ,              0      )
 func NeutralinoMassMatrix(susy *SUSY) (m *linalg.Matrix4) {
 	m = linalg.NewMatrix4()
 	sw := math.Sqrt(Sw2)
@@ -89,8 +89,8 @@ func NeutralinoMassMatrix(susy *SUSY) (m *linalg.Matrix4) {
 // CharginoMassMatrix returns the 2x2 chargino mass matrix.
 //
 //	M =
-// 	( M_wino,        √2*Mw*cos(𝛽) )
-// 	( √2*Mw*sin(𝛽),       µ       )
+// 		( M_wino,        √2*Mw*cos(𝛽) )
+// 		( √2*Mw*sin(𝛽),       µ       )
 func CharginoMassMatrix(susy *SUSY) (m *linalg.Matrix2) {
 	m = linalg.NewMatrix2()
 	sb := math.Sin(math.Atan(susy.TanBeta))
@@ -196,7 +196,6 @@ func NewParameterFromLheFile( path string ) (*Parameter,error) {
 	}
 	masses := tmp.(map[int]float64)
 	
-	
 	N := data.Blocks["nmix"].(*linalg.Matrix4)
 	U := data.Blocks["umix"].(*linalg.Matrix2)
 	V := data.Blocks["vmix"].(*linalg.Matrix2)
@@ -233,6 +232,7 @@ func NewParameterFromLheFile( path string ) (*Parameter,error) {
 }
 	
 
+// NewParameter is an old function which should not be used anymore.
 func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su float64, M_sd float64) *Parameter {
 	susy := &SUSY{
 		Mu:      mu,
@@ -472,7 +472,7 @@ func DSigma(s, cos𝜃 float64, p *Parameter) float64 {
 //
 // 	s: mandelstam, e.g. s = (14000 GeV)²
 // 	p: SUSY parameter
-func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
+func Sigma(s, Q float64, p *Parameter) (sigma float64, error float64) {
 	tau := (p.M_i + p.M_j) * (p.M_i + p.M_j)
 
 	Integrand := func(x1, x2, t float64) float64 {
@@ -484,14 +484,19 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 			return 0.0
 		}
 		// factorization scale for the pdfs. 
-		Q := 300.0
+		//Q := 300.0
 		// get values of pdfs
 		fu_x1 := pdf.Xfx(x1, Q, pdf.UQuark) / x1
 		fd_x2 := pdf.Xfx(x2, Q, pdf.DBarQuark) / x2
 		fu_x2 := pdf.Xfx(x2, Q, pdf.UQuark) / x2
 		fd_x1 := pdf.Xfx(x1, Q, pdf.DBarQuark) / x1
+		
+		fc_x1 := pdf.Xfx(x1, Q, pdf.CQuark)/x1
+		fs_x2 := pdf.Xfx(x2, Q, pdf.SBarQuark) / x2
+		fc_x2 := pdf.Xfx(x2, Q, pdf.CQuark) / x2
+		fs_x1 := pdf.Xfx(x1, Q, pdf.SBarQuark) / x1
 
-		return (fu_x1*fd_x2 + fd_x1*fu_x2) * DSigma(x1*x2*s, t, p)
+		return (fu_x1*fd_x2 + fd_x1*fu_x2 + fc_x1*fs_x2 + fs_x1*fc_x2) * DSigma(x1*x2*s, t, p)
 	}
 
 	// Integrate over cos𝜃 = -1..1
@@ -499,13 +504,14 @@ func Sigma(s float64, p *Parameter) (sigma float64, error float64) {
 	tmax := 1.0
 
 	// print debug messages
-	fmt.Printf("DSigma( s, tmin, p ) = %e\n", DSigma(s, tmin, p))
+	/*fmt.Printf("DSigma( s, tmin, p ) = %e\n", DSigma(s, tmin, p))
 	fmt.Printf("DSigma( s, tmax/2.0, p ) = %e\n", DSigma(s, tmax/2.0, p))
 	fmt.Printf("DSigma( s, tmax, p ) =  %e\n", DSigma(s, tmax, p))
-	fmt.Printf("DSigma2( s, tmax, p ) = %e\n", DSigma2(s, tmax, p))
+	fmt.Printf("DSigma2( s, tmax, p ) = %e\n", DSigma2(s, tmax, p))*/
+	fmt.Printf( "start int\n" )
 
 	// Integrate the diff. cross section
-	sigma, error = integrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, 3000000)
+	sigma, error = integrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, 5000000)
 	sigma *= CrossSectionToPb // Convert 1/GeV^2 in pb
 	error *= CrossSectionToPb
 	return

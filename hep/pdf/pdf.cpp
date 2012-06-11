@@ -3,7 +3,12 @@
 #include "pdf.h"
 
 void InitPDFSet( char * name ) {
-	LHAPDF::initPDFSet( name, LHAPDF::LHGRID, 0 );
+	int typ = 0;
+	if (typ==0) {
+		LHAPDF::initPDFSet( name, LHAPDF::LHPDF, 0 );
+	} else {
+		LHAPDF::initPDFSet( name, LHAPDF::LHGRID, 0 );
+	}
 }
 
 void InitPDF( int i ) {

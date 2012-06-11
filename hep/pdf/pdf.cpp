@@ -2,8 +2,7 @@
 
 #include "pdf.h"
 
-void InitPDFSet( char * name ) {
-	int typ = 0;
+void InitPDFSet( char * name, int typ ) {
 	if (typ==0) {
 		LHAPDF::initPDFSet( name, LHAPDF::LHPDF, 0 );
 	} else {

@@ -7,8 +7,6 @@ package pdf
 // #include "pdf.h"
 import "C"
 
-// BUG(lo): Xfx uses "cteq6mE" as pdfs. The name in Init is not used.
-
 // Type represents a parton type.
 type Type int
 
@@ -41,11 +39,7 @@ const (
 
 // Init initalizes the PDFs.
 func Init(name string, typ PdfType) {
-	C.InitPDFSet(C.CString("cteq6l"))
-}
-
-func InitPDF(i int) {
-	//C.InitPDF(C.int(i))
+	C.InitPDFSet(C.CString(name), C.int(typ))
 }
 
 // Xfx returns x*f(x,Q) for the parton typ where f is the pdf and Q the factorization scale.

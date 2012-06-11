@@ -3,11 +3,11 @@ package hep
 import (
 	"fmt"
 	"math"
+	"physics/hep/lhe"
 	"physics/hep/pdf"
+	"physics/hep/pdg"
 	"physics/math/linalg"
 	"physics/math/mcintegrator"
-	"physics/hep/pdg"
-	"physics/hep/lhe"
 )
 
 type SUSY struct {
@@ -15,6 +15,8 @@ type SUSY struct {
 	TanBeta float64
 	M_su    float64
 	M_sd    float64
+	M_ss    float64
+	M_sc    float64
 	M_bino  float64
 	M_wino  float64
 }
@@ -179,7 +181,7 @@ type Parameter struct {
 	A_L_u          float64
 }
 
-func NewParameterFromLheFile( path string ) (*Parameter,error) {
+func NewParameterFromLheFile(path string) (*Parameter, error) {
 	lfile := lhe.NewFile()
 	lfile.AddBlockCmd("mass", lhe.ReadList)
 	lfile.AddBlockCmd("nmix", lhe.ReadMatrix4)
@@ -187,19 +189,19 @@ func NewParameterFromLheFile( path string ) (*Parameter,error) {
 	lfile.AddBlockCmd("vmix", lhe.ReadMatrix2)
 	data, err := lfile.ReadFromFile(path)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	tmp, ok := data.Blocks["mass"]
 	if ok != true {
-		return nil, fmt.Errorf( "no mass block in file: %s", path )
+		return nil, fmt.Errorf("no mass block in file: %s", path)
 	}
 	masses := tmp.(map[int]float64)
-	
+
 	N := data.Blocks["nmix"].(*linalg.Matrix4)
 	U := data.Blocks["umix"].(*linalg.Matrix2)
 	V := data.Blocks["vmix"].(*linalg.Matrix2)
-	
+
 	i := 1 // use chi_2^0
 	j := 0 // use chi_1^+
 
@@ -211,12 +213,14 @@ func NewParameterFromLheFile( path string ) (*Parameter,error) {
 	A_L_t := A_L(i, -1.0/3.0, -1.0/2.0, N)
 	A_L_u := A_L(i, 2.0/3.0, 1.0/2.0, N)
 	susy := &SUSY{
-		M_su:   masses[pdg.SUQuarkL],
-		M_sd:    masses[pdg.SDQuarkL],
+		M_su: masses[pdg.SUQuarkL],
+		M_sd: masses[pdg.SDQuarkL],
+		M_ss: masses[pdg.SSQuarkL],
+		M_sc: masses[pdg.SCQuarkL],
 	}
-	
+
 	return &Parameter{
-		Susy: susy,
+		Susy:           susy,
 		N:              N,
 		U:              U,
 		V:              V,
@@ -228,9 +232,8 @@ func NewParameterFromLheFile( path string ) (*Parameter,error) {
 		A_L_c_Chargino: A_L_c_Chargino,
 		A_L_t:          A_L_t,
 		A_L_u:          A_L_u,
-	},nil
+	}, nil
 }
-	
 
 // NewParameter is an old function which should not be used anymore.
 func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su float64, M_sd float64) *Parameter {
@@ -356,7 +359,13 @@ func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su flo
 }
 
 // M2 returns the squared matrix element of pp -> chi_1^+ chi_2^0
-func M2(s, cos_theta float64, p *Parameter) float64 {
+//
+// Parameter
+//	s		Mandelstam variable s
+//	cos_theta	angle in cms
+//	quarks		0: u and d quarks as initial states, any other value: c and s quarks as initial states
+//	p		SUSY Parameter e.g. quark masses
+func M2(s, cos_theta float64, quarks int, p *Parameter) float64 {
 	sw := math.Sqrt(Sw2)
 	l := 1.0 / math.Sqrt2 / sw
 
@@ -369,8 +378,16 @@ func M2(s, cos_theta float64, p *Parameter) float64 {
 	u_j := u - p.M_j*p.M_j
 	t_j := t - p.M_j*p.M_j
 
-	t_q := t - p.Susy.M_sd*p.Susy.M_sd
-	u_q := u - p.Susy.M_su*p.Susy.M_su
+	t_q := 0.0
+	u_q := 0.0
+	if quarks == 0 {
+		t_q = t - p.Susy.M_sd*p.Susy.M_sd
+		u_q = u - p.Susy.M_su*p.Susy.M_su
+	} else {
+		t_q = t - p.Susy.M_ss*p.Susy.M_ss
+		u_q = u - p.Susy.M_sc*p.Susy.M_sc
+	}
+
 	s_q := s - Mw*Mw
 
 	l2 := l * l
@@ -393,6 +410,11 @@ func M2(s, cos_theta float64, p *Parameter) float64 {
 	return 0.5*ss + tt + uu + ts - us - tu
 }
 
+// DSigma2 returns d𝜎/dcos𝜃 for pp -> 𝜒_1^+ 𝜒_2^0
+//
+// It's a different implementation of DSigma.
+// Warning:
+//	Only u,d quarks as initial states
 func DSigma2(s, cos_theta float64, p *Parameter) float64 {
 	sw := math.Sqrt(Sw2)
 	cw := math.Cos(math.Asin(sw))
@@ -454,7 +476,14 @@ func Heaviside(x float64) float64 {
 }
 
 // DSigma returns d𝜎/dcos𝜃 for pp -> 𝜒_1^+ 𝜒_2^0
-func DSigma(s, cos𝜃 float64, p *Parameter) float64 {
+//
+// Parameter
+//	s		Mandelstam variable s
+//	cos_theta	angle in cms
+//	quarks		0: u and d quarks as initial states, any other value: c and s quarks as initial states
+//	p		SUSY Parameter e.g. quark masses
+func DSigma(s, cos𝜃 float64, quarks int, p *Parameter) float64 {
+	// precalculate powers of the masses
 	m3 := p.M_i
 	m4 := p.M_j
 	m3_2 := m3 * m3
@@ -465,7 +494,7 @@ func DSigma(s, cos𝜃 float64, p *Parameter) float64 {
 	// d𝜎 /dcos𝜃 = d𝜎/ dt * dt/dcos𝜃 = d𝜎/dt * 2|p||p'|
 	// d𝜎/dt = 1/16𝜋 1/s² |M|²
 	// |M|² = e^4 M2
-	return Alpha * Alpha * math.Pi / 3.0 / s / s * M2(s, cos𝜃, p) * math.Sqrt(s) * p_prime
+	return Alpha * Alpha * math.Pi / 3.0 / s / s * M2(s, cos𝜃, quarks, p) * math.Sqrt(s) * p_prime
 }
 
 // Sigma returns the total cross section of the process pp -> 𝜒_1^+ 𝜒_2^0.
@@ -490,13 +519,13 @@ func Sigma(s, Q float64, p *Parameter) (sigma float64, error float64) {
 		fd_x2 := pdf.Xfx(x2, Q, pdf.DBarQuark) / x2
 		fu_x2 := pdf.Xfx(x2, Q, pdf.UQuark) / x2
 		fd_x1 := pdf.Xfx(x1, Q, pdf.DBarQuark) / x1
-		
-		fc_x1 := pdf.Xfx(x1, Q, pdf.CQuark)/x1
+
+		fc_x1 := pdf.Xfx(x1, Q, pdf.CQuark) / x1
 		fs_x2 := pdf.Xfx(x2, Q, pdf.SBarQuark) / x2
 		fc_x2 := pdf.Xfx(x2, Q, pdf.CQuark) / x2
 		fs_x1 := pdf.Xfx(x1, Q, pdf.SBarQuark) / x1
 
-		return (fu_x1*fd_x2 + fd_x1*fu_x2 + fc_x1*fs_x2 + fs_x1*fc_x2) * DSigma(x1*x2*s, t, p)
+		return (fu_x1*fd_x2+fd_x1*fu_x2)*DSigma(x1*x2*s, t, 0, p) + (fc_x1*fs_x2+fs_x1*fc_x2)*DSigma(x1*x2*s, t, 1, p)
 	}
 
 	// Integrate over cos𝜃 = -1..1
@@ -508,7 +537,7 @@ func Sigma(s, Q float64, p *Parameter) (sigma float64, error float64) {
 	fmt.Printf("DSigma( s, tmax/2.0, p ) = %e\n", DSigma(s, tmax/2.0, p))
 	fmt.Printf("DSigma( s, tmax, p ) =  %e\n", DSigma(s, tmax, p))
 	fmt.Printf("DSigma2( s, tmax, p ) = %e\n", DSigma2(s, tmax, p))*/
-	fmt.Printf( "start int\n" )
+	fmt.Printf("start int\n")
 
 	// Integrate the diff. cross section
 	sigma, error = integrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, 5000000)

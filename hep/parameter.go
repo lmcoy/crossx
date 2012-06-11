@@ -501,7 +501,7 @@ func DSigma(s, cos𝜃 float64, quarks int, p *Parameter) float64 {
 //
 // 	s: mandelstam, e.g. s = (14000 GeV)²
 // 	p: SUSY parameter
-func Sigma(s, Q float64, p *Parameter) (sigma float64, error float64) {
+func Sigma(s, Q float64, N int, p *Parameter) (sigma float64, error float64) {
 	tau := (p.M_i + p.M_j) * (p.M_i + p.M_j)
 
 	Integrand := func(x1, x2, t float64) float64 {
@@ -540,7 +540,7 @@ func Sigma(s, Q float64, p *Parameter) (sigma float64, error float64) {
 	fmt.Printf("start int\n")
 
 	// Integrate the diff. cross section
-	sigma, error = integrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, 5000000)
+	sigma, error = integrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, N)
 	sigma *= CrossSectionToPb // Convert 1/GeV^2 in pb
 	error *= CrossSectionToPb
 	return

@@ -220,6 +220,7 @@ func (M *Matrix4) Transposed() *Matrix4 {
 }
 
 // Returns true if M equals A otherwise false.
+//
 // Uses approximate equals not == operator.
 func (M *Matrix4) Equals(A *Matrix4) bool {
 	for i := 0; i < 16; i++ {

@@ -2,16 +2,19 @@ package linalg
 
 import (
 	"math"
-	"math/cmplx"
 )
 
 const (
-	epsilon = 1.0e-14
+	epsilon = 1.0e-10
 )
 
-// compareFloat64 returns true true iff a equals b.
-// Two floating point numbers are assumed to be equal if the distance between their 
-// floating point representations is less than 10 steps.
+// compareFloat64 returns true iff a equals b.
+//
+// Two floating point numbers are assumed to be equal if 
+// 	absolute error |a-b| < 1e-10
+// 	relative error < 1e-10
+//
+// compareFloat64(a,b) == compareFloat64(b,a)
 func compareFloat64(a, b float64) bool {
 	/*if a == b {
 		return true
@@ -38,12 +41,33 @@ func compareFloat64(a, b float64) bool {
 		return true
 	}
 	return false*/
-	return math.Abs(a-b) < epsilon
+	if a == b {
+		return true
+	}
+	// check absolute error
+	if math.Abs(a-b) < epsilon {
+		return true
+	}
+	// check relative error
+	// do this since an error of 1 is very large for a value near 0
+	// but it is small enough to assume two values to be equal
+	// if the values are really large.
+	var relError float64
+	// use two cases two ensure that compareFloat64(a,b) == compareFloat64(b,a) in any case.
+	if math.Abs(b) > math.Abs(a) {
+		relError = math.Abs((a - b) / b)
+	} else {
+		relError = math.Abs((a - b) / a)
+	}
+	if relError <= epsilon {
+		return true
+	}
+	return false
 }
 
 func compareComplex128(a, b complex128) bool {
 	if a == b {
 		return true
 	}
-	return cmplx.Abs(a-b) < epsilon
+	return compareFloat64(imag(a), imag(b)) && compareFloat64(real(a), real(b))
 }

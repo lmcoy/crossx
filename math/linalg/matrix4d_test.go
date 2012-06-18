@@ -78,6 +78,18 @@ func TestMul(t *testing.T) {
 	}
 }
 
+func TestTimes(t *testing.T) {
+	a := B.Times(C)
+	if !a.Equals(expBtimesC) {
+		t.Errorf("B * C: \nB:        %v\nC:        %v\nExpected: %v\nResult:   %v", B, C, expBtimesC, a)
+	}
+
+	b := C.Times(B)
+	if !b.Equals(expCtimesB) {
+		t.Errorf("C * B: \nB:        %v\nC:        %v\nExpected: %v\nResult:   %v", B, C, expCtimesB, b)
+	}
+}
+
 func TestInverse(t *testing.T) {
 	invA, invertible := A.Inverted()
 	if !invertible {
@@ -106,7 +118,17 @@ func TestMulFactor(t *testing.T) {
 	a.MulFactor(factor)
 
 	for i := 0; i < 16; i++ {
-		if a[i] != A[i]*factor {
+		if !compareFloat64(a[i], A[i]*factor) {
+			t.Errorf("A*factor:\n Expected: %v\nResult:   %v", A[i]*factor, a[i])
+		}
+	}
+}
+
+func TestTimesFactor(t *testing.T) {
+	factor := rand.Float64()
+	a := A.TimesFactor(factor)
+	for i := 0; i < 16; i++ {
+		if !compareFloat64(a[i], A[i]*factor) {
 			t.Errorf("A*factor:\n Expected: %v\nResult:   %v", A[i]*factor, a[i])
 		}
 	}
@@ -128,6 +150,28 @@ func TestQRDecomposition(t *testing.T) {
 	if A.Equals(comp) == false {
 		t.Errorf("Expected: Q.R == A\n Q = \n%s\nR = \n%s\nOriginal A =\n%s\nQ.R =\n%s",
 			Q.MultilineString(), R.MultilineString(), A.MultilineString(), comp.MultilineString())
+	}
+}
+
+func TestEigen(t *testing.T) {
+	M := NewMatrix4()
+	M.SetColumn(0, &Vector4D{1.0, 2.0, 1.0, 3.0})
+	M.SetColumn(1, &Vector4D{2.0, 4.0, 5.0, 1.0})
+	M.SetColumn(2, &Vector4D{1.0, 5.0, -1.0, 4.0})
+	M.SetColumn(3, &Vector4D{3.0, 1.0, 4.0, -3.0})
+
+	vals, vecs := M.Eigen()
+	failed := false
+	for i := 0; i < 4; i++ {
+		lhs := M.TimesVector(vecs.Column(i))
+		rhs := vecs.Column(i).TimesFactor(vals[i])
+		if !lhs.Equals(rhs) {
+			t.Logf("Value: %f, Vector: %s not Eigenvalue, Eigenvector of\n M = \n%s\n", vals[i], vecs.Column(i), M.MultilineString())
+			failed = true
+		}
+	}
+	if failed {
+		t.Fail()
 	}
 }
 

@@ -101,4 +101,3 @@ func (v *Vector4c) Normalized() (r *Vector4c) {
 func (v *Vector4c) TimesFactor(factor complex128) *Vector4c {
 	return &Vector4c{factor * v[0], factor * v[1], factor * v[2], factor * v[3]}
 }
-

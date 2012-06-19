@@ -142,6 +142,62 @@ func cross(input *crossInput) {
 
 }
 
+type dsigmaInput struct {
+	lhefile *string
+	outfile *string
+	quarks  *string
+	sqrts   *float64
+	samples *int
+}
+
+func dsigma(input *dsigmaInput) {
+	// create out file
+	file, err := os.Create(*input.outfile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %s\n", err)
+		return
+	}
+	defer file.Close()
+
+	// check input parameters
+	sqrts := *input.sqrts
+	if sqrts <= 0.0 {
+		fmt.Fprintf(os.Stderr, "error: √s < 0: √s = %f\n", sqrts)
+		return
+	}
+
+	samples := *input.samples
+	if samples < 5 {
+		fmt.Fprintf(os.Stderr, "error: too few samples: %d\n", samples)
+	}
+
+	quarks := 0
+	switch {
+	case *input.quarks == "ud":
+		quarks = 0
+	case *input.quarks == "cs":
+		quarks = 1
+	default:
+		fmt.Fprintf(os.Stderr, "error: unkown quarks in initial state: %s. Expected \"ud\", \"cs\"\n", *input.quarks)
+		return
+	}
+
+	// open input file
+	p, e := hep.NewParameterFromLheFile(*input.lhefile)
+	if e != nil {
+		fmt.Fprintf(os.Stderr, "error: %s\n", e)
+		return
+	}
+
+	fmt.Fprintf(file, "# dsigma/dcos(theta) for √s = %8.1f, %s as initial state\n", sqrts, *input.quarks)
+	fmt.Fprintln(file, "#\n# cos(theta)    dsigma/dcos(theta)")
+	for i := 0; i < samples; i++ {
+		cosTheta := -1.0 + float64(i)*2.0/float64(samples-1)
+		dsigma := hep.DSigma(sqrts*sqrts, cosTheta, quarks, p)
+		fmt.Fprintf(file, "%12.5e    %12.5e\n", cosTheta, dsigma)
+	}
+}
+
 func main() {
 	args := os.Args
 
@@ -150,6 +206,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nUsage: \n    %s COMMAND OPTIONS\n\ncommands:\n", args[0])
 		fmt.Fprintln(os.Stderr, "    qdep    -- Calculates the cross section for various values of Q.")
 		fmt.Fprintln(os.Stderr, "    cross   -- Calculates the cross section.")
+		fmt.Fprintln(os.Stderr, "    dsigma  -- Calculates the differential cross section.")
 		fmt.Fprintf(os.Stderr, "    For more information about the commands use \"%s command --help\".\n", args[0])
 	}
 	if len(args) < 2 {
@@ -220,6 +277,37 @@ func main() {
 		fmt.Println("pdfType:    ", *input.pdfType)
 		fmt.Println("N:          ", *input.N)
 		cross(input)
+	case "dsigma":
+		input := &dsigmaInput{}
+		flagset := flag.NewFlagSet("dsigma", flag.ExitOnError)
+		flagset.Usage = func() {
+			fmt.Fprintf(os.Stderr, "Usage of %s:\n", args[1])
+			fmt.Fprintf(os.Stderr, "%s %s [[OPTIONS]] inputfile\n\nOptions:\n", os.Args[0], args[1])
+			flagset.PrintDefaults()
+		}
+		input.outfile = flagset.String("o", "dsigma.out", "output file")
+		input.sqrts = flag.Float64("sqrts", 14000.0, "center of mass energy in GeV. (default: LHC sqrt(s) = 14 TeV).")
+		input.quarks = flagset.String("quarks", "ud", "Initial state quarks. Expected \"ud\", \"cs\".")
+		input.samples = flagset.Int("samples", 30, "The sampling rate of dsigma/dcos(theta).")
+		flagset.Parse(args[2:])
+		switch {
+		case flagset.NArg() == 0:
+			fmt.Fprintln(os.Stderr, "error: no input file found")
+			return
+		case flagset.NArg() > 1:
+			fmt.Fprintln(os.Stderr, "error: too many input files. Only one is supported.")
+			return
+		default:
+			nargs := flagset.Args()
+			in := nargs[0]
+			input.lhefile = &in
+		}
+		fmt.Println("infile:  ", *input.lhefile)
+		fmt.Println("outfile: ", *input.outfile)
+		fmt.Println("sqrts:   ", *input.sqrts)
+		fmt.Println("quarks:  ", *input.quarks)
+		fmt.Println("samples: ", *input.samples)
+		dsigma(input)
 	default:
 		fmt.Fprintf(os.Stderr, "'%s' is not a command", args[1])
 		printUsage()

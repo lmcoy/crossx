@@ -55,6 +55,9 @@ const (
 	Mpi0 = 134.9766 * MeV
 )
 
+var sw = math.Sqrt(Sw2)
+var cw = math.Cos(math.Asin(sw))
+
 // NeutralinoMassMatrix returns the mass matrix for neutralinos with the SUSY parameters in susy.
 //
 // 	mass matrix (symmetric):
@@ -64,8 +67,6 @@ const (
 // 		(    *,       *,            -µ,              0      )
 func NeutralinoMassMatrix(susy *SUSY) (m *linalg.Matrix4) {
 	m = linalg.NewMatrix4()
-	sw := math.Sqrt(Sw2)
-	cw := math.Cos(math.Asin(sw))
 	sb := math.Sin(math.Atan(susy.TanBeta))
 	cb := math.Cos(math.Atan(susy.TanBeta))
 
@@ -111,19 +112,14 @@ func CharginoMassMatrix(susy *SUSY) (m *linalg.Matrix2) {
 }
 
 func A_L_Chargino(j int, U *linalg.Matrix2) float64 {
-	sw := math.Sqrt(Sw2)
 	return 1.0 / math.Sqrt2 * U.At(j, 0) / sw
 }
 
 func A_L_c_Chargino(j int, V *linalg.Matrix2) float64 {
-	sw := math.Sqrt(Sw2)
 	return 1.0 / math.Sqrt2 * V.At(j, 0) / sw
 }
 
 func A_L(i int, q, T3 float64, N *linalg.Matrix4) float64 {
-	sw := math.Sqrt(Sw2)
-	cw := math.Cos(math.Asin(sw))
-
 	// convert N from bino-wino to photino-zino basis
 	Ni1 := N.At(i, 0)*cw + N.At(i, 1)*sw
 	Ni2 := -N.At(i, 0)*sw + N.At(i, 1)*cw
@@ -132,9 +128,6 @@ func A_L(i int, q, T3 float64, N *linalg.Matrix4) float64 {
 }
 
 func L(i, j int, N *linalg.Matrix4, V *linalg.Matrix2) float64 {
-	sw := math.Sqrt(Sw2)
-	cw := math.Cos(math.Asin(sw))
-
 	// convert N from bino-wino to photino-zino basis
 	Ni4 := N.At(i, 3)
 	Ni1 := N.At(i, 0)*cw + N.At(i, 1)*sw
@@ -144,9 +137,6 @@ func L(i, j int, N *linalg.Matrix4, V *linalg.Matrix2) float64 {
 }
 
 func R(i, j int, N *linalg.Matrix4, U *linalg.Matrix2) float64 {
-	sw := math.Sqrt(Sw2)
-	cw := math.Cos(math.Asin(sw))
-
 	// convert N from bino-wino to photino-zino basis
 	Ni3 := N.At(i, 2)
 	Ni1 := N.At(i, 0)*cw + N.At(i, 1)*sw
@@ -372,7 +362,6 @@ func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su flo
 //	quarks		0: u and d quarks as initial states, any other value: c and s quarks as initial states
 //	p		SUSY Parameter e.g. quark masses
 func M2(s, cos_theta float64, quarks int, p *Parameter) float64 {
-	sw := math.Sqrt(Sw2)
 	l := 1.0 / math.Sqrt2 / sw
 
 	t := Mandelstam_t(cos_theta, s, p.M_i, p.M_j)
@@ -422,8 +411,6 @@ func M2(s, cos_theta float64, quarks int, p *Parameter) float64 {
 // Warning:
 //	Only u,d quarks as initial states
 func DSigma2(s, cos_theta float64, p *Parameter) float64 {
-	sw := math.Sqrt(Sw2)
-	cw := math.Cos(math.Asin(sw))
 	t := Mandelstam_t(cos_theta, s, p.M_i, p.M_j)
 
 	// u = mc^2 + md^2 - s - t

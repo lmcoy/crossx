@@ -14,13 +14,13 @@ type SUSY struct {
 	Mu      float64
 	TanBeta float64
 	// squarks masses
-	M_su    float64
-	M_sd    float64
-	M_ss    float64
-	M_sc    float64
+	M_su float64
+	M_sd float64
+	M_ss float64
+	M_sc float64
 	// bino & wino masses
-	M_bino  float64
-	M_wino  float64
+	M_bino float64
+	M_wino float64
 }
 
 const (

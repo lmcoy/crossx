@@ -64,6 +64,7 @@ func qdep(input *qdepInput) {
 	fmt.Fprintln(file, "# Q\tI\terror (abs)")
 	for i := 0; i < 12; i++ {
 		Q := 25.0 + float64(i)*25.0
+		fmt.Printf("Calculating cross section with Q = %8.3f GeV...\n", Q)
 		I, error := hep.Sigma(sqrts*sqrts, Q, N, p)
 		fmt.Fprintf(file, "%e\t%e\t%e\n", Q, I, error)
 	}
@@ -118,8 +119,8 @@ func cross(input *crossInput) {
 	}
 
 	fmt.Fprintln(file, "# m(chi_2^0) m(chi_1^+)        Q          I       abs. error")
-	for i, filename := range input.infiles {
-		fmt.Printf("file %d: %s\n", i, filename)
+	for _, filename := range input.infiles {
+		fmt.Printf("Calculating cross section from %s...\n", filename)
 		p, e := hep.NewParameterFromLheFile(filename)
 		if e != nil {
 			fmt.Fprintf(os.Stderr, "error: %s\n", e)
@@ -128,8 +129,9 @@ func cross(input *crossInput) {
 		Q := *input.Q
 		if Q == 0.0 {
 			Q = (p.M_i + p.M_j) / 2.0
-			fmt.Printf("info: using %f as factorization scale\n", Q)
+			fmt.Printf("    using %8.2f as factorization scale\n", Q)
 		}
+		fmt.Printf("    using %d monte carlo iterations\n", N)
 		if Q < 0.0 {
 			fmt.Fprintf(os.Stderr, "error: refactorization scale Q is < 0: Q = %f\n", Q)
 			return

@@ -274,14 +274,6 @@ func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su flo
 	}
 	//------------------------------------
 
-	// Print debug messages
-	/*fmt.Printf("N = \n%s\n", N.MultilineString())
-	fmt.Printf("N.M.N^T =\n%s\n", N.Transposed().Times(M_neutralino).Times(N).MultilineString())
-
-	fmt.Printf("U = \n%s\n", U.MultilineString())
-	fmt.Printf("V = \n%s\n", V.MultilineString())
-	fmt.Printf("U^T.M.V =\n%s\n", U.Transposed().Times(M_chargino).Times(V).MultilineString())*/
-
 	// Formular for chargino mass matrix diagonalization: U*.M.V^{-1}
 	// Rewrite previously calculated matrices in this notation
 	U = U.Transposed()
@@ -337,14 +329,6 @@ func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su flo
 	A_L_c_Chargino := A_L_c_Chargino(j, V)
 	A_L_t := A_L(i, -1.0/3.0, -1.0/2.0, N)
 	A_L_u := A_L(i, 2.0/3.0, 1.0/2.0, N)
-
-	// Print debug informations
-	/*fmt.Printf("L = %f\n", L)
-	fmt.Printf("R = %f\n", R)
-	fmt.Printf("A_L_t = %f\n", A_L_t)
-	fmt.Printf("A_L_u = %f\n", A_L_u)
-	fmt.Printf("A_L_Chargino = %f\n", A_L_Chargino)
-	fmt.Printf("A_L_c_Chargino = %f\n", A_L_c_Chargino)*/
 
 	return &Parameter{
 		Susy:           susy,
@@ -412,7 +396,6 @@ func M2(s, cos_theta float64, quarks int, p *Parameter) float64 {
 	us := 2.0 / u_q / s_q * (l*p.L*u_i*u_j + p.M_i*p.M_j*p.R*l*s) * (p.A_L_c_Chargino * p.A_L_u)
 	tu := 2.0 / t_q / u_q * p.M_i * p.M_j * s * p.A_L_t * p.A_L_u * p.A_L_Chargino * p.A_L_c_Chargino
 
-	//return (0.5*ss + 16.0*tt + 16.0*uu + 4.0*ts - 4.0*us - 16.0*tu)/5.0
 	return 0.5*ss + tt + uu + ts - us - tu
 }
 
@@ -537,8 +520,6 @@ func Sigma(s, Q float64, N int, p *Parameter) (sigma float64, error float64) {
 	// Integrate over cos𝜃 = -1..1
 	tmin := -1.0
 	tmax := 1.0
-
-	fmt.Printf("start int\n")
 
 	// Integrate the diff. cross section
 	sigma, error = integrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, N)

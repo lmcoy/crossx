@@ -13,20 +13,24 @@ import (
 type SUSY struct {
 	Mu      float64
 	TanBeta float64
+	// squarks masses
 	M_su    float64
 	M_sd    float64
 	M_ss    float64
 	M_sc    float64
+	// bino & wino masses
 	M_bino  float64
 	M_wino  float64
 }
 
 const (
+	// All values are given in GeV
 	GeV = 1.0
 	MeV = 1.0e-3
 	KeV = 1.0e-6
 	TeV = 1.0e+3
-	// Converts a cross section in 1/GeV^2 to pb
+	// Converts a cross section in 1/GeV² to pb
+	// Usage: s[pb] = s[1/GeV²]*CrossSectionToPb
 	CrossSectionToPb = 3.8937944929e8
 )
 
@@ -65,6 +69,7 @@ func NeutralinoMassMatrix(susy *SUSY) (m *linalg.Matrix4) {
 	sb := math.Sin(math.Atan(susy.TanBeta))
 	cb := math.Cos(math.Atan(susy.TanBeta))
 
+	// precalculate values
 	A := -cb * sw * Mz
 	B := sb * sw * Mz
 	C := cb * cw * Mz
@@ -171,8 +176,8 @@ type Parameter struct {
 	N              *linalg.Matrix4 // Matrix for diagonalizing the neutralino mass matrix via N^T.M.N
 	U              *linalg.Matrix2
 	V              *linalg.Matrix2
-	M_i            float64
-	M_j            float64
+	M_i            float64 // Neutralino2 mass
+	M_j            float64 // Chargino1 mass
 	L              float64
 	R              float64
 	A_L_Chargino   float64
@@ -181,6 +186,7 @@ type Parameter struct {
 	A_L_u          float64
 }
 
+// NewParameterFromLheFile reads the parameters from an input file at path.
 func NewParameterFromLheFile(path string) (*Parameter, error) {
 	lfile := lhe.NewFile()
 	lfile.AddBlockCmd("mass", lhe.ReadList)
@@ -500,6 +506,8 @@ func DSigma(s, cos𝜃 float64, quarks int, p *Parameter) float64 {
 // Sigma returns the total cross section of the process pp -> 𝜒_1^+ 𝜒_2^0.
 //
 // 	s: mandelstam, e.g. s = (14000 GeV)²
+// 	Q: factorization scale for the pdfs
+// 	N: number of monte carlo integration iterations
 // 	p: SUSY parameter
 func Sigma(s, Q float64, N int, p *Parameter) (sigma float64, error float64) {
 	tau := (p.M_i + p.M_j) * (p.M_i + p.M_j)
@@ -512,8 +520,6 @@ func Sigma(s, Q float64, N int, p *Parameter) (sigma float64, error float64) {
 		if h == 0.0 {
 			return 0.0
 		}
-		// factorization scale for the pdfs. 
-		//Q := 300.0
 		// get values of pdfs
 		fu_x1 := pdf.Xfx(x1, Q, pdf.UQuark) / x1
 		fd_x2 := pdf.Xfx(x2, Q, pdf.DBarQuark) / x2
@@ -532,11 +538,6 @@ func Sigma(s, Q float64, N int, p *Parameter) (sigma float64, error float64) {
 	tmin := -1.0
 	tmax := 1.0
 
-	// print debug messages
-	/*fmt.Printf("DSigma( s, tmin, p ) = %e\n", DSigma(s, tmin, p))
-	fmt.Printf("DSigma( s, tmax/2.0, p ) = %e\n", DSigma(s, tmax/2.0, p))
-	fmt.Printf("DSigma( s, tmax, p ) =  %e\n", DSigma(s, tmax, p))
-	fmt.Printf("DSigma2( s, tmax, p ) = %e\n", DSigma2(s, tmax, p))*/
 	fmt.Printf("start int\n")
 
 	// Integrate the diff. cross section

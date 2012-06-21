@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"physics/hep"
+	"physics/hep/nccross"
 	"physics/hep/pdf"
 	"time"
 )
@@ -37,7 +37,7 @@ func qdep(input *qdepInput) {
 	// init random number generator
 	rand.Seed(time.Now().Unix())
 
-	p, e := hep.NewParameterFromLheFile(*input.filein)
+	p, e := nccross.NewParameterFromLheFile(*input.filein)
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "error: %s\n", e)
 		return
@@ -65,7 +65,7 @@ func qdep(input *qdepInput) {
 	for i := 0; i < 12; i++ {
 		Q := 25.0 + float64(i)*25.0
 		fmt.Printf("Calculating cross section with Q = %8.3f GeV...\n", Q)
-		I, error := hep.Sigma(sqrts*sqrts, Q, N, p)
+		I, error := nccross.Sigma(1, 0, sqrts*sqrts, Q, N, p)
 		fmt.Fprintf(file, "%e\t%e\t%e\n", Q, I, error)
 	}
 }
@@ -121,14 +121,16 @@ func cross(input *crossInput) {
 	fmt.Fprintln(file, "# m(chi_2^0) m(chi_1^+)        Q          I       abs. error")
 	for _, filename := range input.infiles {
 		fmt.Printf("Calculating cross section from %s...\n", filename)
-		p, e := hep.NewParameterFromLheFile(filename)
+		i := 1
+		j := 0
+		p, e := nccross.NewParameterFromLheFile(filename)
 		if e != nil {
 			fmt.Fprintf(os.Stderr, "error: %s\n", e)
 			return
 		}
 		Q := *input.Q
 		if Q == 0.0 {
-			Q = (p.M_i + p.M_j) / 2.0
+			Q = (p.M_n[i] + p.M_c[j]) / 2.0
 			fmt.Printf("    using %8.2f as factorization scale\n", Q)
 		}
 		fmt.Printf("    using %d monte carlo iterations\n", N)
@@ -136,8 +138,8 @@ func cross(input *crossInput) {
 			fmt.Fprintf(os.Stderr, "error: refactorization scale Q is < 0: Q = %f\n", Q)
 			return
 		}
-		I, error := hep.Sigma(sqrts*sqrts, Q, N, p)
-		fmt.Fprintf(file, "% 12.4e % 10.4e % 10.4e % 10.4e % 10.4e\n", p.M_i, p.M_j, Q, I, error)
+		I, error := nccross.Sigma(1, 0, sqrts*sqrts, Q, N, p)
+		fmt.Fprintf(file, "% 12.4e % 10.4e % 10.4e % 10.4e % 10.4e\n", p.M_n[i], p.M_c[j], Q, I, error)
 	}
 
 }
@@ -183,7 +185,7 @@ func dsigma(input *dsigmaInput) {
 	}
 
 	// open input file
-	p, e := hep.NewParameterFromLheFile(*input.lhefile)
+	p, e := nccross.NewParameterFromLheFile(*input.lhefile)
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "error: %s\n", e)
 		return
@@ -193,7 +195,7 @@ func dsigma(input *dsigmaInput) {
 	fmt.Fprintln(file, "#\n# cos(theta)    dsigma/dcos(theta)")
 	for i := 0; i < samples; i++ {
 		cosTheta := -1.0 + float64(i)*2.0/float64(samples-1)
-		dsigma := hep.DSigma(sqrts*sqrts, cosTheta, quarks, p)
+		dsigma := nccross.DSigma(1, 0, sqrts*sqrts, cosTheta, quarks, p, nil)
 		fmt.Fprintf(file, "%12.5e    %12.5e\n", cosTheta, dsigma)
 	}
 }

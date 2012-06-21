@@ -1,14 +1,17 @@
-package hep
+package nccross
 
 import (
 	"math"
 	"math/rand"
+	"physics/hep"
 	"physics/hep/pdf"
 	"testing"
 	"time"
 )
 
 // precalculated data (prospino with LHC 14 TeV)
+// chi_2^0 chi_1^+ production in LO. 
+// Q = average of neutralino and chargino mass.
 var tests = []struct {
 	file   string
 	crossx float64
@@ -55,11 +58,11 @@ func TestSigma(t *testing.T) {
 		Q := (M_i + M_j) / 2.0
 		t.Logf("    using Q = %8.3f GeV as factorization scale.", Q)
 
-		sqrts := 14.0 * TeV
+		sqrts := 14.0 * hep.TeV
 		t.Logf("    using √s = %8.3f GeV.", sqrts)
 		N := 600000
 		t.Logf("    using N = %d monte carlo iterations", N)
-		I, error := Sigma(sqrts*sqrts, Q, N, p)
+		I, error := Sigma(1, 0, sqrts*sqrts, Q, N, p)
 
 		if math.Abs(I-tt.crossx) > 4.0*error {
 			away := math.Abs(I-tt.crossx) / error

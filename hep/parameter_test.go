@@ -50,7 +50,9 @@ func TestSigma(t *testing.T) {
 			continue
 		}
 		// set factorization scale to average of neutralino chargino mass
-		Q := (p.M_i + p.M_j) / 2.0
+		M_i := p.M_n[1]
+		M_j := p.M_c[0]
+		Q := (M_i + M_j) / 2.0
 		t.Logf("    using Q = %8.3f GeV as factorization scale.", Q)
 
 		sqrts := 14.0 * TeV
@@ -80,7 +82,6 @@ func TestSigma(t *testing.T) {
 			case away > 2.0 && away <= 3.0:
 				threesigma += 1
 			default:
-				panic("not reachable")
 			}
 		}
 	}

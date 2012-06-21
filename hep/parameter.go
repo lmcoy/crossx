@@ -166,8 +166,8 @@ type Parameter struct {
 	N              *linalg.Matrix4 // Matrix for diagonalizing the neutralino mass matrix via N^T.M.N
 	U              *linalg.Matrix2
 	V              *linalg.Matrix2
-	M_i            float64 // Neutralino2 mass
-	M_j            float64 // Chargino1 mass
+	M_n            [4]float64
+	M_c            [2]float64
 	L              float64
 	R              float64
 	A_L_Chargino   float64
@@ -220,8 +220,8 @@ func NewParameterFromLheFile(path string) (*Parameter, error) {
 		N:              N,
 		U:              U,
 		V:              V,
-		M_i:            masses[pdg.Neutralino2],
-		M_j:            masses[pdg.Chargino1],
+		M_n:            [4]float64{masses[pdg.Neutralino1], masses[pdg.Neutralino2], masses[pdg.Neutralino3], masses[pdg.Neutralino4]},
+		M_c:            [2]float64{masses[pdg.Chargino1], masses[pdg.Chargino2]},
 		L:              L,
 		R:              R,
 		A_L_Chargino:   A_L_Chargino,
@@ -327,8 +327,8 @@ func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su flo
 		N:              N,
 		U:              U,
 		V:              V,
-		M_i:            2.35046162E+02, /*m_i*/
-		M_j:            2.37406034E+02, /*m_j*/
+		M_n:            [4]float64{0.0, 2.35046162E+02, 0.0, 0.0}, /*m_i*/
+		M_c:            [2]float64{2.37406034E+02, 0.0},           /*m_j*/
 		L:              L,
 		R:              R,
 		A_L_Chargino:   A_L_Chargino,
@@ -348,14 +348,17 @@ func NewParameter(mu float64, M1 float64, M2 float64, tan_beta float64, M_su flo
 func M2(s, cos_theta float64, quarks int, p *Parameter) float64 {
 	l := 1.0 / math.Sqrt2 / sw
 
-	t := Mandelstam_t(cos_theta, s, p.M_i, p.M_j)
+	M_i := p.M_n[1]
+	M_j := p.M_c[0]
+
+	t := Mandelstam_t(cos_theta, s, M_i, M_j)
 
 	// u = mc^2 + md^2 - s - t
-	u := p.M_i*p.M_i + p.M_j*p.M_j - s - t
-	u_i := u - p.M_i*p.M_i
-	t_i := t - p.M_i*p.M_i
-	u_j := u - p.M_j*p.M_j
-	t_j := t - p.M_j*p.M_j
+	u := M_i*M_i + M_j*M_j - s - t
+	u_i := u - M_i*M_i
+	t_i := t - M_i*M_i
+	u_j := u - M_j*M_j
+	t_j := t - M_j*M_j
 
 	t_q := 0.0
 	u_q := 0.0
@@ -374,16 +377,16 @@ func M2(s, cos_theta float64, quarks int, p *Parameter) float64 {
 	R2 := p.R * p.R
 
 	// s channel
-	ss := 2.0 / s_q / s_q * (L2*l2*u_i*u_j + s*p.M_i*p.M_j*l2*2*p.L*p.R + R2*l2*t_i*t_j)
+	ss := 2.0 / s_q / s_q * (L2*l2*u_i*u_j + s*M_i*M_j*l2*2*p.L*p.R + R2*l2*t_i*t_j)
 	// t channel
 	tt := 1.0 / t_q / t_q * p.A_L_t * p.A_L_t * p.A_L_Chargino * p.A_L_Chargino * t_i * t_j
 	// u channel
 	uu := 1.0 / u_q / u_q * p.A_L_u * p.A_L_u * p.A_L_c_Chargino * p.A_L_c_Chargino * u_i * u_j
 
 	// interference terms
-	ts := 2.0 / t_q / s_q * (l*p.L*p.M_i*p.M_j*s + l*p.R*t_i*t_j) * p.A_L_t * p.A_L_Chargino
-	us := 2.0 / u_q / s_q * (l*p.L*u_i*u_j + p.M_i*p.M_j*p.R*l*s) * (p.A_L_c_Chargino * p.A_L_u)
-	tu := 2.0 / t_q / u_q * p.M_i * p.M_j * s * p.A_L_t * p.A_L_u * p.A_L_Chargino * p.A_L_c_Chargino
+	ts := 2.0 / t_q / s_q * (l*p.L*M_i*M_j*s + l*p.R*t_i*t_j) * p.A_L_t * p.A_L_Chargino
+	us := 2.0 / u_q / s_q * (l*p.L*u_i*u_j + M_i*M_j*p.R*l*s) * (p.A_L_c_Chargino * p.A_L_u)
+	tu := 2.0 / t_q / u_q * M_i * M_j * s * p.A_L_t * p.A_L_u * p.A_L_Chargino * p.A_L_c_Chargino
 
 	return 0.5*ss + tt + uu + ts - us - tu
 }
@@ -394,14 +397,16 @@ func M2(s, cos_theta float64, quarks int, p *Parameter) float64 {
 // Warning:
 //	Only u,d quarks as initial states
 func DSigma2(s, cos_theta float64, p *Parameter) float64 {
-	t := Mandelstam_t(cos_theta, s, p.M_i, p.M_j)
+	M_i := p.M_n[1]
+	M_j := p.M_c[0]
+	t := Mandelstam_t(cos_theta, s, M_i, M_j)
 
 	// u = mc^2 + md^2 - s - t
-	u := p.M_i*p.M_i + p.M_j*p.M_j - s - t
-	u_i := u - p.M_i*p.M_i
-	t_i := t - p.M_i*p.M_i
-	u_j := u - p.M_j*p.M_j
-	t_j := t - p.M_j*p.M_j
+	u := M_i*M_i + M_j*M_j - s - t
+	u_i := u - M_i*M_i
+	t_i := t - M_i*M_i
+	u_j := u - M_j*M_j
+	t_j := t - M_j*M_j
 
 	t_q := t - p.Susy.M_sd*p.Susy.M_sd
 	u_q := u - p.Susy.M_su*p.Susy.M_su
@@ -421,14 +426,14 @@ func DSigma2(s, cos_theta float64, p *Parameter) float64 {
 	Q_LR := 1.0 / Sw2 / math.Sqrt2 * ((N22*p.U.At(0, 0)+N23*p.U.At(0, 1)/math.Sqrt2)/s_q -
 		p.U.At(0, 0)/cw*(N21*(-1/3.0+0.5)*sw+N22*(-0.5)*cw)/t_q)
 
-	m3 := p.M_i
-	m4 := p.M_j
+	m3 := M_i
+	m4 := M_j
 	m3_2 := m3 * m3
 	m3_4 := m3_2 * m3_2
 	m4_2 := m4 * m4
 	p_prime := math.Sqrt((m3_4-2*m3_2*(m4_2+s)+(m4_2-s)*(m4_2-s))/s) / 2.0
 
-	return math.Pi * Alpha * Alpha / 3.0 / s / s * (Q_LL*Q_LL*u_i*u_j + Q_LR*Q_LR*t_i*t_j + 2*Q_LL*Q_LR*p.M_i*p.M_j*s) * math.Sqrt(s) * p_prime
+	return math.Pi * Alpha * Alpha / 3.0 / s / s * (Q_LL*Q_LL*u_i*u_j + Q_LR*Q_LR*t_i*t_j + 2*Q_LL*Q_LR*M_i*M_j*s) * math.Sqrt(s) * p_prime
 }
 
 // DSigma3 returns d𝜎/dcos𝜃 for e^+e^- -> µ^+ µ^- (massless particles).
@@ -459,9 +464,11 @@ func Heaviside(x float64) float64 {
 //	quarks		0: u and d quarks as initial states, any other value: c and s quarks as initial states
 //	p		SUSY Parameter e.g. quark masses
 func DSigma(s, cos𝜃 float64, quarks int, p *Parameter) float64 {
+	M_i := p.M_n[1]
+	M_j := p.M_c[0]
 	// precalculate powers of the masses
-	m3 := p.M_i
-	m4 := p.M_j
+	m3 := M_i
+	m4 := M_j
 	m3_2 := m3 * m3
 	m3_4 := m3_2 * m3_2
 	m4_2 := m4 * m4
@@ -480,7 +487,9 @@ func DSigma(s, cos𝜃 float64, quarks int, p *Parameter) float64 {
 // 	N: number of monte carlo integration iterations
 // 	p: SUSY parameter
 func Sigma(s, Q float64, N int, p *Parameter) (sigma float64, error float64) {
-	tau := (p.M_i + p.M_j) * (p.M_i + p.M_j)
+	M_i := p.M_n[1]
+	M_j := p.M_c[0]
+	tau := (M_i + M_j) * (M_i + M_j)
 
 	Integrand := func(x1, x2, t float64) float64 {
 		// minimal value of s: 

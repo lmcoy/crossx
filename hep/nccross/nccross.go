@@ -267,7 +267,7 @@ func Sigma(i, j int, s, Q float64, N int, p *Parameter) (sigma float64, error fl
 	tmax := 1.0
 
 	// Integrate the diff. cross section
-	sigma, error = integrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, N)
+	sigma, error = mcintegrator.Integrate3(Integrand, []float64{0.0, 0.0, tmin}, []float64{1.0, 1.0, tmax}, N)
 	sigma *= hep.CrossSectionToPb // Convert 1/GeV^2 in pb
 	error *= hep.CrossSectionToPb
 	return

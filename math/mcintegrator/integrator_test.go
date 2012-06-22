@@ -1,4 +1,4 @@
-package integrator
+package mcintegrator
 
 import (
 	"math"

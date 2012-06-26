@@ -1,6 +1,7 @@
 package nccross
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"physics/hep"
@@ -31,11 +32,63 @@ var tests = []struct {
 	{"testdata/375.lhe", 0.138},
 	{"testdata/400.lhe", 0.104},
 	{"testdata/450.lhe", 0.0628},
+	{"testdata/cmssm10.1.1.spec", 0.037400},
+	{"testdata/cmssm10.1.2.spec", 0.024800},
+	{"testdata/cmssm10.1.3.spec", 0.016900},
+	{"testdata/cmssm10.1.4.spec", 0.011900},
+	{"testdata/cmssm10.1.5.spec", 0.008490},
+	{"testdata/cmssm10.2.1.spec", 0.037700},
+	{"testdata/cmssm10.2.2.spec", 0.025000},
+	{"testdata/cmssm10.2.3.spec", 0.017100},
+	{"testdata/cmssm10.2.4.spec", 0.012000},
+	{"testdata/cmssm10.2.5.spec", 0.008570},
+	{"testdata/cmssm10.3.1.spec", 0.060400},
+	{"testdata/cmssm10.3.2.spec", 0.031400},
+	{"testdata/cmssm10.3.3.spec", 0.017600},
+	{"testdata/cmssm10.3.4.spec", 0.010400},
+	{"testdata/cmssm10.3.5.spec", 0.006420},
+	{"testdata/cmssm10.4.1.spec", 0.210000},
+	{"testdata/cmssm10.4.2.spec", 0.122000},
+	{"testdata/cmssm10.4.3.spec", 0.075500},
+	{"testdata/cmssm10.4.4.spec", 0.048700},
+	{"testdata/cmssm10.4.5.spec", 0.032600},
+	{"testdata/cmssm40.1.1.spec", 0.035700},
+	{"testdata/cmssm40.1.2.spec", 0.023800},
+	{"testdata/cmssm40.1.3.spec", 0.016300},
+	{"testdata/cmssm40.1.4.spec", 0.011500},
+	{"testdata/cmssm40.1.5.spec", 0.008220},
+	{"testdata/cmssm40.2.1.spec", 0.060300},
+	{"testdata/cmssm40.2.2.spec", 0.016900},
+	{"testdata/cmssm40.2.3.spec", 0.025700},
+	{"testdata/cmssm40.2.4.spec", 0.018000},
+	{"testdata/cmssm40.2.5.spec", 0.012700},
+	{"testdata/cmssm40.3.1.spec", 0.208000},
+	{"testdata/cmssm40.3.2.spec", 0.158000},
+	{"testdata/cmssm40.3.3.spec", 0.122000},
+	{"testdata/cmssm40.3.4.spec", 0.095600},
+	{"testdata/cmssm40.3.5.spec", 0.075800},
+	{"testdata/mgmsb1.1.spec", 0.209000},
+	{"testdata/mgmsb1.2.spec", 0.120000},
+	{"testdata/mgmsb1.3.spec", 0.073800},
+	{"testdata/mgmsb1.4.spec", 0.021900},
+	{"testdata/mgmsb1.5.spec", 0.032100},
+	{"testdata/mgmsb2.1.1.spec", 0.456000},
+	{"testdata/mgmsb2.1.2.spec", 0.283000},
+	{"testdata/mgmsb2.1.3.spec", 0.185000},
+	{"testdata/mgmsb2.1.4.spec", 0.126000},
+	{"testdata/mgmsb2.1.5.spec", 0.088100},
+	{"testdata/mgmsb2.1.6.spec", 0.063500},
+	{"testdata/mgmsb2.2.1.spec", 0.123000},
+	{"testdata/mgmsb2.2.2.spec", 0.089100},
+	{"testdata/mgmsb2.2.3.spec", 0.066600},
+	{"testdata/mgmsb2.2.4.spec", 0.050700},
+	{"testdata/mgmsb2.2.5.spec", 0.039200},
+	{"testdata/mgmsb2.2.6.spec", 0.030700},
 }
 
 func TestSigma(t *testing.T) {
 	pdf.Init("cteq6ll", pdf.LHGrid)
-
+	fmt.Println("This test takes a long time... hang on!")
 	// init random number generator
 	rand.Seed(time.Now().Unix())
 
@@ -44,8 +97,9 @@ func TestSigma(t *testing.T) {
 	threesigma := 0
 
 	// perform tests
-	for _, tt := range tests {
+	for i, tt := range tests {
 		t.Log("starting calculation of cross section")
+		fmt.Printf("lhe file (%2d/%d): %5.1f %% done\n", i+1, len(tests), 100.0*float64(i)/float64(len(tests)))
 		p, e := NewParameterFromLheFile(tt.file)
 		t.Logf("    using %s as input file.\n", tt.file)
 		if e != nil {
@@ -60,7 +114,7 @@ func TestSigma(t *testing.T) {
 
 		sqrts := 14.0 * hep.TeV
 		t.Logf("    using √s = %8.3f GeV.", sqrts)
-		N := 600000
+		N := 100000
 		t.Logf("    using N = %d monte carlo iterations", N)
 		I, error := Sigma(1, 0, sqrts*sqrts, Q, N, p)
 

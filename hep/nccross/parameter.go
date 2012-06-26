@@ -8,7 +8,7 @@ import (
 )
 
 // Parameter contains all input parameter needed for calculating
-// the cross section of pp -> chi^0 chi^+
+// the cross section of pp -> 𝜒^0 𝜒^+
 type Parameter struct {
 	N    *linalg.Matrix4 // Matrix for diagonalizing the neutralino mass matrix via N^T.M.N
 	U    *linalg.Matrix2 // chargino mixing matrix

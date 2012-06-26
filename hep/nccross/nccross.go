@@ -1,6 +1,6 @@
 package nccross
 
-// BUG(Lennart): negative masses of neutralinos in lhe not file supported! Sigma will fail silently!
+// BUG(Lennart): negative masses of neutralinos in lhe file not supported! Sigma will fail silently!
 
 import (
 	"math"
@@ -14,6 +14,9 @@ import (
 var sw = math.Sqrt(hep.Sw2)
 var cw = math.Cos(math.Asin(sw))
 
+// cache contains values which can be precalculated and do not 
+// have to be calculated in every function call of DSigma when
+// it is integrated over the parton distributions.
 type cache struct {
 	L              float64
 	R              float64
@@ -57,19 +60,20 @@ func cR(i, j int, N *linalg.Matrix4, U *linalg.Matrix2) float64 {
 	return 1.0 / (math.Sqrt2 * sw) * (-Ni3*U.At(j, 1) - math.Sqrt2*(sw*Ni1+cw*Ni2)*U.At(j, 0))
 }
 
-// m2 returns the squared matrix element of pp -> chi_1^+ chi_2^0
+// m2 returns the squared matrix element of pp → 𝜒_1^+ 𝜒_2^0
 //
 // Parameter
-//  i       Neutralino (0..3)
-//  j       Chargino (0..1)
-//	s		Mandelstam variable s
-//	cos_theta	angle in cms
-//	quarks		0: u and d quarks as initial states, any other value: c and s quarks as initial states
-//	p		SUSY Parameter e.g. quark masses
-//  c       cache for L,R, ..., if nil all values will be calculated
+//  i            Neutralino (0..3)
+//  j            Chargino (0..1)
+//  s            Mandelstam variable s
+//  cos_theta    angle in cms
+//  quarks       0: u and d quarks as initial states, any other value: c and s quarks as initial states
+//  p            SUSY Parameter e.g. quark masses
+//  c            cache for L,R, ..., if nil all values will be calculated
 func m2(i, j int, s, cos_theta float64, quarks int, p *Parameter, c *cache) float64 {
 	l := 1.0 / math.Sqrt2 / sw
 
+	// Check input parameters
 	if i < 0 || i > 3 {
 		return 0.0
 	}
@@ -130,11 +134,12 @@ func m2(i, j int, s, cos_theta float64, quarks int, p *Parameter, c *cache) floa
 	return 0.5*ss + tt + uu + ts - us - tu
 }
 
-// DSigma2 returns d𝜎/dcos𝜃 for pp -> 𝜒_1^+ 𝜒_2^0
+// DSigma2 returns d𝜎/dcos𝜃 for pp → 𝜒_1^+ 𝜒_2^0
 //
 // It's a different implementation of DSigma.
+//
 // Warning:
-//	Only u,d quarks as initial states
+//     Only u,d quarks as initial states
 func DSigma2(s, cos_theta float64, p *Parameter) float64 {
 	M_i := p.M_n[1]
 	M_j := p.M_c[0]
@@ -154,8 +159,6 @@ func DSigma2(s, cos_theta float64, p *Parameter) float64 {
 	// Prefetch values of N
 	N23 := p.N.At(1, 2)
 	N24 := p.N.At(1, 3)
-	//N21 := p.N.At(1, 0)*cw + p.N.At(1, 1)*sw
-	//N22 := -p.N.At(1, 0)*sw + p.N.At(1, 1)*cw
 	N21 := p.N.At(1, 0)
 	N22 := p.N.At(1, 1)
 
@@ -175,15 +178,17 @@ func DSigma2(s, cos_theta float64, p *Parameter) float64 {
 	return math.Pi * hep.Alpha * hep.Alpha / 3.0 / s / s * (Q_LL*Q_LL*u_i*u_j + Q_LR*Q_LR*t_i*t_j + 2*Q_LL*Q_LR*M_i*M_j*s) * math.Sqrt(s) * p_prime
 }
 
-// DSigma returns d𝜎/dcos𝜃 for pp -> 𝜒_1^+ 𝜒_2^0
+// DSigma returns d𝜎/dcos𝜃 for pp → 𝜒_1^+ 𝜒_2^0
 //
 // Parameter
-//  i		Neutralino (0..3)
-//  j       Chargino (0,1)
-//	s		Mandelstam variable s
-//	cos_theta	angle in cms
-//	quarks		0: u and d quarks as initial states, any other value: c and s quarks as initial states
-//	p		SUSY Parameter e.g. quark masses
+//     i         Neutralino (0..3)
+//     j         Chargino (0,1)
+//     s         Mandelstam variable s
+//     cos𝜃      angle in cms
+//     quarks    0: u and d quarks as initial states, any other value: c and s quarks as initial states
+//     p         SUSY Parameter e.g. quark masses
+//
+// It returns 0.0 if i or j is not valid.
 func DSigma(i, j int, s, cos𝜃 float64, quarks int, p *Parameter, c *cache) float64 {
 	if i < 0 || i > 3 {
 		return 0.0
@@ -207,18 +212,20 @@ func DSigma(i, j int, s, cos𝜃 float64, quarks int, p *Parameter, c *cache) fl
 	return hep.Alpha * hep.Alpha * math.Pi / 3.0 / s / s * m2(i, j, s, cos𝜃, quarks, p, c) * math.Sqrt(s) * p_prime
 }
 
-// Sigma returns the total cross section of the process pp -> 𝜒_1^+ 𝜒_2^0.
+// Sigma returns the total cross section of the process pp → 𝜒_1^+ 𝜒_2^0.
 //
-//  i		Neutralino (0..3)
-//  j       Chargino (0,1)
-// 	s: mandelstam, e.g. s = (14000 GeV)²
-// 	Q: factorization scale for the pdfs
-// 	N: number of monte carlo integration iterations
-// 	p: SUSY parameter
+// Parameter
+//     i    Neutralino (0..3)
+//     j    Chargino (0,1)
+//     s    mandelstam, e.g. s = (14000 GeV)²
+//     Q    factorization scale for the pdfs
+//     N    number of monte carlo integration iterations
+//     p    SUSY parameter
 //
-// only i = 1, j = 0 tested!
-// negative masses of neutralinos in lhe not supported! Sigma will fail silently!
-// If i or j is not valid this function returns -1.0, 0.0 as cross section.
+// Warnings
+//     only i = 1, j = 0 tested!
+//     negative masses of neutralinos in lhe not supported! Sigma will fail silently!
+//     If i or j is not valid this function returns -1.0, 0.0 as cross section.
 func Sigma(i, j int, s, Q float64, N int, p *Parameter) (sigma float64, error float64) {
 	if i < 0 || i > 3 {
 		return -1.0, 0.0

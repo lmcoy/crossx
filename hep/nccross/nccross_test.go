@@ -10,7 +10,7 @@ import (
 )
 
 // precalculated data (prospino with LHC 14 TeV)
-// chi_2^0 chi_1^+ production in LO. 
+// 𝜒_2^0 𝜒_1^+ production in LO. 
 // Q = average of neutralino and chargino mass.
 var tests = []struct {
 	file   string

@@ -196,8 +196,8 @@ func DSigma(i, j int, s, cos𝜃 float64, quarks int, p *Parameter, c *cache) fl
 	if j < 0 || j > 1 {
 		return 0.0
 	}
-	M_i := p.M_n[i]
-	M_j := p.M_c[j]
+	M_i := math.Abs(p.M_n[i])
+	M_j := math.Abs(p.M_c[j])
 	// precalculate powers of the masses
 	m3 := M_i
 	m4 := M_j
@@ -233,8 +233,8 @@ func Sigma(i, j int, s, Q float64, N int, p *Parameter) (sigma float64, error fl
 	if j < 0 || j > 1 {
 		return -1.0, 0.0
 	}
-	M_i := p.M_n[i]
-	M_j := p.M_c[j]
+	M_i := math.Abs(p.M_n[i])
+	M_j := math.Abs(p.M_c[j])
 	tau := (M_i + M_j) * (M_i + M_j)
 
 	// precalculate for |M|²

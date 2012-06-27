@@ -25,6 +25,7 @@ Flags for qdep
 	steps         number of different Q (default: 10)
 	neutralino    selects neutralino (default: 2)
 	chargino      selects chargino (default: 1)
+	v             verbose output
 
 Example
 	main qdep -o file.dat -N 100000 input.lhe
@@ -43,6 +44,7 @@ Flags for cross
 	              If Q equals 0.0 Q will be set to the average of the two neutralino masses.
 	neutralino    selects neutralino (default: 2)
 	chargino      selects chargino (default: 1)
+	v             verbose output
 
 Calculates dsigma/dcos(theta)
 
@@ -55,6 +57,7 @@ Flags for dsigma
 	samples       the sampling rate of dsigma/dcos(theta). (default: 30)
 	neutralino    selects neutralino (default: 2)
 	chargino      selects chargino (default: 1)
+	v             verbose output
 
 Example
 	main cross -o file.dat input1.lhe input2.lhe input3.lhe

@@ -11,6 +11,21 @@ import (
 	"time"
 )
 
+// set verbose with flag
+var verbose bool
+
+func printf(format string, args ...interface{}) {
+	if verbose {
+		fmt.Printf(format, args...)
+	}
+}
+
+func println(args ...interface{}) {
+	if verbose {
+		fmt.Println(args...)
+	}
+}
+
 type qdepInput struct {
 	sqrts      *float64
 	filein     *string
@@ -34,7 +49,7 @@ func qdep(input *qdepInput) {
 	case "LHGrid":
 		ptype = pdf.LHGrid
 	default:
-		fmt.Println("unexpected pdf type: ", *input.pdfType, " using LHPdf instead.")
+		fmt.Println("unexpected pdf type:", *input.pdfType, "using LHPdf instead.")
 		ptype = pdf.LHPdf
 	}
 
@@ -92,10 +107,13 @@ func qdep(input *qdepInput) {
 		return
 	}
 
+	fmt.Fprintf(file, "# pp →  𝜒_%d^0 𝜒_%d^+ with √s = %.1f GeV\n", neutralino, chargino, sqrts)
 	fmt.Fprintln(file, "# Q\tI\terror (abs)")
 	for i := 0; i < steps; i++ {
 		Q := qmin + float64(i)*step
-		fmt.Printf("Calculating cross section with Q = %8.3f GeV...\n", Q)
+		printf("Calculating cross section for pp →  𝜒_%d^0 𝜒_%d^+ with √s = %.1f GeV\n", neutralino, chargino, sqrts)
+		printf("    using Q = %.2f GeV as factorization scale\n", Q)
+		printf("    using %d monte carlo iterations\n", N)
 		I, error := nccross.Sigma(neutralino-1, chargino-1, sqrts*sqrts, Q, N, p)
 		fmt.Fprintf(file, "%e\t%e\t%e\n", Q, I, error)
 	}
@@ -122,7 +140,7 @@ func cross(input *crossInput) {
 	case "LHGrid":
 		ptype = pdf.LHGrid
 	default:
-		fmt.Println("unexpected pdf type: ", *input.pdfType, " using LHPdf instead.")
+		println("unexpected pdf type:", *input.pdfType, "using LHPdf instead.")
 		ptype = pdf.LHPdf
 	}
 
@@ -163,9 +181,10 @@ func cross(input *crossInput) {
 		return
 	}
 
-	fmt.Fprintln(file, "# m(chi_2^0) m(chi_1^+)        Q          I       abs. error")
+	fmt.Fprintf(file, "# pp →  𝜒_%d^0 𝜒_%d^+ with √s = %.1f GeV\n", neutralino, chargino, sqrts)
+	fmt.Fprintf(file, "# m(chi_%d^0) m(chi_%d^+)        Q          I       abs. error\n", neutralino, chargino)
 	for _, filename := range input.infiles {
-		fmt.Printf("Calculating cross section from %s...\n", filename)
+		printf("Calculating cross section from %s...\n", filename)
 		i := neutralino - 1
 		j := chargino - 1
 		p, e := nccross.NewParameterFromLheFile(filename)
@@ -176,13 +195,14 @@ func cross(input *crossInput) {
 		Q := *input.Q
 		if Q == 0.0 {
 			Q = (math.Abs(p.M_n[i]) + math.Abs(p.M_c[j])) / 2.0
-			fmt.Printf("    using %8.2f as factorization scale\n", Q)
 		}
-		fmt.Printf("    using %d monte carlo iterations\n", N)
 		if Q < 0.0 {
 			fmt.Fprintf(os.Stderr, "error: refactorization scale Q is < 0: Q = %f\n", Q)
 			return
 		}
+		printf("    process: pp →  𝜒_%d^0 𝜒_%d^+ with √s = %.1f GeV\n", neutralino, chargino, sqrts)
+		printf("    using Q = %.2f GeV as factorization scale\n", Q)
+		printf("    using %d monte carlo iterations\n", N)
 		I, error := nccross.Sigma(i, j, sqrts*sqrts, Q, N, p)
 		fmt.Fprintf(file, "% 12.4e % 10.4e % 10.4e % 10.4e % 10.4e\n", p.M_n[i], p.M_c[j], Q, I, error)
 	}
@@ -250,7 +270,8 @@ func dsigma(input *dsigmaInput) {
 		return
 	}
 
-	fmt.Fprintf(file, "# dsigma/dcos(theta) for √s = %8.1f, %s as initial state\n", sqrts, *input.quarks)
+	fmt.Fprintf(file, "# dsigma/dcos(theta) for √s = %.1f\n# initial state: %s\n", sqrts, *input.quarks)
+	fmt.Fprintf(file, "#final state: 𝜒_%d^0 𝜒_%d^+\n", neutralino, chargino)
 	fmt.Fprintln(file, "#\n# cos(theta)    dsigma/dcos(theta)")
 	for i := 0; i < samples; i++ {
 		cosTheta := -1.0 + float64(i)*2.0/float64(samples-1)
@@ -263,7 +284,7 @@ func main() {
 	args := os.Args
 
 	printUsage := func() {
-		fmt.Fprintln(os.Stderr, "%s calculates the cross section for pp -> 𝜒2^0 𝜒1^+.", args[0])
+		fmt.Fprintln(os.Stderr, "%s calculates the cross section for pp -> 𝜒^0 𝜒^+.", args[0])
 		fmt.Fprintf(os.Stderr, "\nUsage: \n    %s COMMAND OPTIONS\n\ncommands:\n", args[0])
 		fmt.Fprintln(os.Stderr, "    qdep    -- Calculates the cross section for various values of Q.")
 		fmt.Fprintln(os.Stderr, "    cross   -- Calculates the cross section.")
@@ -295,6 +316,7 @@ func main() {
 		input.steps = flagset.Int("steps", 10, "number of different Q")
 		input.neutralino = flagset.Int("neutralino", 2, "selects neutralino")
 		input.chargino = flagset.Int("chargino", 1, "selects chargino.")
+		flagset.BoolVar(&verbose, "v", false, "verbose output")
 		flagset.Parse(args[2:])
 		switch {
 		case flagset.NArg() == 0:
@@ -308,8 +330,8 @@ func main() {
 			in := nargs[0]
 			input.filein = &in
 		}
-		fmt.Println("inputfile: ", *input.filein)
-		fmt.Println("outfile:   ", *input.fileout)
+		println("inputfile: ", *input.filein)
+		println("outfile:   ", *input.fileout)
 		qdep(input)
 	case "cross":
 		input := &crossInput{infiles: make([]string, 0, 10)}
@@ -327,14 +349,15 @@ func main() {
 		input.N = flagset.Int("N", 5000000, "number of monte carlo integration iterations.")
 		input.neutralino = flagset.Int("neutralino", 2, "selects neutralino")
 		input.chargino = flagset.Int("chargino", 1, "selects chargino.")
+		flagset.BoolVar(&verbose, "v", false, "verbose output")
 		flagset.Parse(args[2:])
 		if flagset.NArg() <= 0 {
 			fmt.Fprintln(os.Stderr, "error: No input file.")
 			return
 		}
 		input.infiles = append(input.infiles, flagset.Args()...)
-		fmt.Println("inputfiles: ", input.infiles)
-		fmt.Println("outfile:    ", *input.fileout)
+		println("inputfiles: ", input.infiles)
+		println("outfile:    ", *input.fileout)
 		cross(input)
 	case "dsigma":
 		input := &dsigmaInput{}
@@ -350,6 +373,7 @@ func main() {
 		input.samples = flagset.Int("samples", 30, "The sampling rate of dsigma/dcos(theta).")
 		input.neutralino = flagset.Int("neutralino", 2, "selects neutralino")
 		input.chargino = flagset.Int("chargino", 1, "selects chargino.")
+		flagset.BoolVar(&verbose, "v", false, "verbose output")
 		flagset.Parse(args[2:])
 		switch {
 		case flagset.NArg() == 0:
@@ -363,8 +387,8 @@ func main() {
 			in := nargs[0]
 			input.lhefile = &in
 		}
-		fmt.Println("infile:  ", *input.lhefile)
-		fmt.Println("outfile: ", *input.outfile)
+		println("infile:  ", *input.lhefile)
+		println("outfile: ", *input.outfile)
 		dsigma(input)
 	default:
 		fmt.Fprintf(os.Stderr, "'%s' is not a command", args[1])

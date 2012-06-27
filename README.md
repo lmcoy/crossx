@@ -43,6 +43,8 @@ The mode qdep calculates the cross section for pp → 𝜒^0 𝜒^+ with values 
          selects neutralino (default: 2)
     -chargino
          selects chargino (default: 1)
+    -v
+         verbose output
 
 ### Example
 
@@ -72,6 +74,8 @@ The mode cross calculates the cross section for pp → 𝜒^0 𝜒^+.
          selects neutralino (default: 2)
     -chargino
          selects chargino (default: 1)
+    -v
+         verbose output
 
 
 ### Example
@@ -96,6 +100,8 @@ The mode dsigma calculates the differential cross section for qq_ → 𝜒^0 �
          selects neutralino (default: 2)
     -chargino
          selects chargino (default: 1)
+    -v
+         verbose output
 
 Requirements
 ------------

@@ -20,7 +20,7 @@ they are called by
 Calculating cross sections for various values of Q.
 ---------------------------------------------------
 
-The mode qdep calculates the cross section for pp -> 𝜒2^0 𝜒1^+ with values from Q = 25..300 GeV (step size 25 GeV).
+The mode qdep calculates the cross section for pp -> 𝜒2^0 𝜒1^+ with values from Q = qmin..qmax GeV.
 
 ### Flags for qdep
     -sqrts	
@@ -33,6 +33,12 @@ The mode qdep calculates the cross section for pp -> 𝜒2^0 𝜒1^+ with values
          pdf type: LHGrid or LHPdf (default: LHGrid)
     -N
          number of monte carlo integration iterations (default: 5000000)
+    -qmin
+         minimal value of Q in GeV (default: 100)
+    -qmax
+         maximal value of Q in GeV (default: 500)
+    -steps
+         number of different Q (default: 10)
 
 ### Example
 

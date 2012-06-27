@@ -18,6 +18,9 @@ type qdepInput struct {
 	pdf     *string
 	pdfType *string
 	N       *int
+	qmin    *float64
+	qmax    *float64
+	steps   *int
 }
 
 func qdep(input *qdepInput) {
@@ -62,9 +65,21 @@ func qdep(input *qdepInput) {
 		fmt.Fprintf(os.Stderr, "error: too few monte carlo integration iterations: %d\n", N)
 		return
 	}
+	qmin := *input.qmin
+	qmax := *input.qmax
+	if qmin >= qmax {
+		fmt.Fprintf(os.Stderr, "error: qmin must be greater than qmax: qmin = %6.3f, qmax = %6.3f\n", qmin, qmax)
+		return
+	}
+	steps := *input.steps
+	if steps < 2 {
+		fmt.Fprintf(os.Stderr, "error: too few steps: %d\n", steps)
+		return
+	}
+	step := (qmax - qmin) / float64(steps-1)
 	fmt.Fprintln(file, "# Q\tI\terror (abs)")
-	for i := 0; i < 12; i++ {
-		Q := 25.0 + float64(i)*25.0
+	for i := 0; i < steps; i++ {
+		Q := qmin + float64(i)*step
 		fmt.Printf("Calculating cross section with Q = %8.3f GeV...\n", Q)
 		I, error := nccross.Sigma(1, 0, sqrts*sqrts, Q, N, p)
 		fmt.Fprintf(file, "%e\t%e\t%e\n", Q, I, error)
@@ -232,6 +247,9 @@ func main() {
 		input.pdf = flagset.String("pdf", "cteq6ll", "pdf which should be used.")
 		input.pdfType = flagset.String("pdfType", "LHGrid", "pdf type: LHGrid or LHPdf")
 		input.N = flagset.Int("N", 5000000, "number of monte carlo integration iterations")
+		input.qmin = flagset.Float64("qmin", 100.0, "minimal value of Q")
+		input.qmax = flagset.Float64("qmax", 500.0, "maximal value of Q")
+		input.steps = flagset.Int("steps", 10, "number of different Q")
 		flagset.Parse(args[2:])
 		switch {
 		case flagset.NArg() == 0:

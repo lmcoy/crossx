@@ -1,5 +1,5 @@
 /*
-main calculates the cross section for pp -> 𝜒^0 𝜒^+.
+main calculates the cross section for pp → 𝜒^0 𝜒^+.
 
 the modes of main are
 	qdep      Calculates the cross section for various values of Q.
@@ -12,7 +12,7 @@ they are called by
 
 Calculating cross sections for various values of Q.
 
-The mode qdep calculates the cross section for pp -> 𝜒^0 𝜒^+ with values from Q = qmin..qmax GeV.
+The mode qdep calculates the cross section for pp → 𝜒^0 𝜒^+ with values from Q = qmin..qmax GeV.
 
 Flags for qdep
 	sqrts         center of mass energy in GeV. (default: LHC √s = 14 TeV)
@@ -31,7 +31,7 @@ Example
 
 Calculating the cross section.
 
-The mode cross calculates the cross section for pp -> 𝜒^0 𝜒^+.
+The mode cross calculates the cross section for pp → 𝜒^0 𝜒^+.
 
 Flags for cross
 	sqrts         center of mass energy in GeV. (default: LHC √s = 14 TeV)
@@ -46,7 +46,7 @@ Flags for cross
 
 Calculates dsigma/dcos(theta)
 
-The mode dsigma calculates the differential cross section for qq_ -> 𝜒^0 𝜒^+
+The mode dsigma calculates the differential cross section for qq_ → 𝜒^0 𝜒^+
 
 Flags for dsigma
 	sqrts         center of mass energy in GeV. (default: LHC √s = 14 TeV)

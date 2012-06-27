@@ -1,6 +1,6 @@
 crossx
 ======
-The executable main calculates the cross section for pp -> 𝜒^0 𝜒^+.
+The executable main calculates the cross section for pp → 𝜒^0 𝜒^+.
 
 the modes of main are
 
@@ -20,7 +20,7 @@ they are called by
 Calculating cross sections for various values of Q.
 ---------------------------------------------------
 
-The mode qdep calculates the cross section for pp -> 𝜒^0 𝜒^+ with values from Q = qmin..qmax GeV.
+The mode qdep calculates the cross section for pp → 𝜒^0 𝜒^+ with values from Q = qmin..qmax GeV.
 
 ### Flags for qdep
     -sqrts	
@@ -51,7 +51,7 @@ The mode qdep calculates the cross section for pp -> 𝜒^0 𝜒^+ with values f
 Calculating the cross section.
 ------------------------------
 
-The mode cross calculates the cross section for pp -> 𝜒^0 𝜒^+.
+The mode cross calculates the cross section for pp → 𝜒^0 𝜒^+.
 
 ###  Flags for cross
 
@@ -81,7 +81,7 @@ The mode cross calculates the cross section for pp -> 𝜒^0 𝜒^+.
 Calculates dsigma/dcos(theta)
 -----------------------------
 
-The mode dsigma calculates the differential cross section for qq_ -> 𝜒^0 𝜒^+.
+The mode dsigma calculates the differential cross section for qq_ → 𝜒^0 𝜒^+.
 ### Flags for dsigma
 
     -sqrts

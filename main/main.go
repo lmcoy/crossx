@@ -12,15 +12,17 @@ import (
 )
 
 type qdepInput struct {
-	sqrts   *float64
-	filein  *string
-	fileout *string
-	pdf     *string
-	pdfType *string
-	N       *int
-	qmin    *float64
-	qmax    *float64
-	steps   *int
+	sqrts      *float64
+	filein     *string
+	fileout    *string
+	pdf        *string
+	pdfType    *string
+	N          *int
+	qmin       *float64
+	qmax       *float64
+	steps      *int
+	neutralino *int
+	chargino   *int
 }
 
 func qdep(input *qdepInput) {
@@ -77,23 +79,38 @@ func qdep(input *qdepInput) {
 		return
 	}
 	step := (qmax - qmin) / float64(steps-1)
+
+	neutralino := *input.neutralino
+	chargino := *input.chargino
+
+	if neutralino < 1 || neutralino > 4 {
+		fmt.Fprintf(os.Stderr, "error: there are only 4 neutralinos. expected: 1..4\n")
+		return
+	}
+	if chargino < 1 || chargino > 2 {
+		fmt.Fprintf(os.Stderr, "error: there are only 2 charginos. expected: 1,2\n")
+		return
+	}
+
 	fmt.Fprintln(file, "# Q\tI\terror (abs)")
 	for i := 0; i < steps; i++ {
 		Q := qmin + float64(i)*step
 		fmt.Printf("Calculating cross section with Q = %8.3f GeV...\n", Q)
-		I, error := nccross.Sigma(1, 0, sqrts*sqrts, Q, N, p)
+		I, error := nccross.Sigma(neutralino-1, chargino-1, sqrts*sqrts, Q, N, p)
 		fmt.Fprintf(file, "%e\t%e\t%e\n", Q, I, error)
 	}
 }
 
 type crossInput struct {
-	infiles []string
-	fileout *string
-	sqrts   *float64
-	Q       *float64
-	pdf     *string
-	pdfType *string
-	N       *int
+	infiles    []string
+	fileout    *string
+	sqrts      *float64
+	Q          *float64
+	pdf        *string
+	pdfType    *string
+	N          *int
+	neutralino *int
+	chargino   *int
 }
 
 func cross(input *crossInput) {
@@ -134,11 +151,23 @@ func cross(input *crossInput) {
 		return
 	}
 
+	neutralino := *input.neutralino
+	chargino := *input.chargino
+
+	if neutralino < 1 || neutralino > 4 {
+		fmt.Fprintf(os.Stderr, "error: there are only 4 neutralinos. expected: 1..4\n")
+		return
+	}
+	if chargino < 1 || chargino > 2 {
+		fmt.Fprintf(os.Stderr, "error: there are only 2 charginos. expected: 1,2\n")
+		return
+	}
+
 	fmt.Fprintln(file, "# m(chi_2^0) m(chi_1^+)        Q          I       abs. error")
 	for _, filename := range input.infiles {
 		fmt.Printf("Calculating cross section from %s...\n", filename)
-		i := 1
-		j := 0
+		i := neutralino - 1
+		j := chargino - 1
 		p, e := nccross.NewParameterFromLheFile(filename)
 		if e != nil {
 			fmt.Fprintf(os.Stderr, "error: %s\n", e)
@@ -154,18 +183,20 @@ func cross(input *crossInput) {
 			fmt.Fprintf(os.Stderr, "error: refactorization scale Q is < 0: Q = %f\n", Q)
 			return
 		}
-		I, error := nccross.Sigma(1, 0, sqrts*sqrts, Q, N, p)
+		I, error := nccross.Sigma(i, j, sqrts*sqrts, Q, N, p)
 		fmt.Fprintf(file, "% 12.4e % 10.4e % 10.4e % 10.4e % 10.4e\n", p.M_n[i], p.M_c[j], Q, I, error)
 	}
 
 }
 
 type dsigmaInput struct {
-	lhefile *string
-	outfile *string
-	quarks  *string
-	sqrts   *float64
-	samples *int
+	lhefile    *string
+	outfile    *string
+	quarks     *string
+	sqrts      *float64
+	samples    *int
+	neutralino *int
+	chargino   *int
 }
 
 func dsigma(input *dsigmaInput) {
@@ -200,6 +231,18 @@ func dsigma(input *dsigmaInput) {
 		return
 	}
 
+	neutralino := *input.neutralino
+	chargino := *input.chargino
+
+	if neutralino < 1 || neutralino > 4 {
+		fmt.Fprintf(os.Stderr, "error: there are only 4 neutralinos. expected: 1..4\n")
+		return
+	}
+	if chargino < 1 || chargino > 2 {
+		fmt.Fprintf(os.Stderr, "error: there are only 2 charginos. expected: 1,2\n")
+		return
+	}
+
 	// open input file
 	p, e := nccross.NewParameterFromLheFile(*input.lhefile)
 	if e != nil {
@@ -211,7 +254,7 @@ func dsigma(input *dsigmaInput) {
 	fmt.Fprintln(file, "#\n# cos(theta)    dsigma/dcos(theta)")
 	for i := 0; i < samples; i++ {
 		cosTheta := -1.0 + float64(i)*2.0/float64(samples-1)
-		dsigma := nccross.DSigma(1, 0, sqrts*sqrts, cosTheta, quarks, p, nil)
+		dsigma := nccross.DSigma(neutralino-1, chargino-1, sqrts*sqrts, cosTheta, quarks, p, nil)
 		fmt.Fprintf(file, "%12.5e    %12.5e\n", cosTheta, dsigma)
 	}
 }
@@ -250,6 +293,8 @@ func main() {
 		input.qmin = flagset.Float64("qmin", 100.0, "minimal value of Q")
 		input.qmax = flagset.Float64("qmax", 500.0, "maximal value of Q")
 		input.steps = flagset.Int("steps", 10, "number of different Q")
+		input.neutralino = flagset.Int("neutralino", 2, "selects neutralino")
+		input.chargino = flagset.Int("chargino", 1, "selects chargino.")
 		flagset.Parse(args[2:])
 		switch {
 		case flagset.NArg() == 0:
@@ -265,10 +310,6 @@ func main() {
 		}
 		fmt.Println("inputfile: ", *input.filein)
 		fmt.Println("outfile:   ", *input.fileout)
-		fmt.Println("sqrts:     ", *input.sqrts)
-		fmt.Println("pdf:       ", *input.pdf)
-		fmt.Println("pdfType:   ", *input.pdfType)
-		fmt.Println("N:         ", *input.N)
 		qdep(input)
 	case "cross":
 		input := &crossInput{infiles: make([]string, 0, 10)}
@@ -284,6 +325,8 @@ func main() {
 		input.pdf = flagset.String("pdf", "cteq6ll", "pdf which should be used.")
 		input.pdfType = flagset.String("pdfType", "LHGrid", "pdf type: LHGrid or LHPdf.")
 		input.N = flagset.Int("N", 5000000, "number of monte carlo integration iterations.")
+		input.neutralino = flagset.Int("neutralino", 2, "selects neutralino")
+		input.chargino = flagset.Int("chargino", 1, "selects chargino.")
 		flagset.Parse(args[2:])
 		if flagset.NArg() <= 0 {
 			fmt.Fprintln(os.Stderr, "error: No input file.")
@@ -292,11 +335,6 @@ func main() {
 		input.infiles = append(input.infiles, flagset.Args()...)
 		fmt.Println("inputfiles: ", input.infiles)
 		fmt.Println("outfile:    ", *input.fileout)
-		fmt.Println("sqrts:      ", *input.sqrts)
-		fmt.Println("Q:          ", *input.Q)
-		fmt.Println("pdf:        ", *input.pdf)
-		fmt.Println("pdfType:    ", *input.pdfType)
-		fmt.Println("N:          ", *input.N)
 		cross(input)
 	case "dsigma":
 		input := &dsigmaInput{}
@@ -310,6 +348,8 @@ func main() {
 		input.sqrts = flagset.Float64("sqrts", 14000.0, "center of mass energy in GeV. (default: LHC sqrt(s) = 14 TeV).")
 		input.quarks = flagset.String("quarks", "ud", "Initial state quarks. Expected \"ud\", \"cs\".")
 		input.samples = flagset.Int("samples", 30, "The sampling rate of dsigma/dcos(theta).")
+		input.neutralino = flagset.Int("neutralino", 2, "selects neutralino")
+		input.chargino = flagset.Int("chargino", 1, "selects chargino.")
 		flagset.Parse(args[2:])
 		switch {
 		case flagset.NArg() == 0:
@@ -325,9 +365,6 @@ func main() {
 		}
 		fmt.Println("infile:  ", *input.lhefile)
 		fmt.Println("outfile: ", *input.outfile)
-		fmt.Println("sqrts:   ", *input.sqrts)
-		fmt.Println("quarks:  ", *input.quarks)
-		fmt.Println("samples: ", *input.samples)
 		dsigma(input)
 	default:
 		fmt.Fprintf(os.Stderr, "'%s' is not a command", args[1])

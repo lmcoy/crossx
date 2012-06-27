@@ -1,12 +1,12 @@
 crossx
 ======
-The executable main calculates the cross section for pp -> 𝜒2^0 𝜒1^+.
+The executable main calculates the cross section for pp -> 𝜒^0 𝜒^+.
 
 the modes of main are
 
-    qdep	
+    qdep
         Calculates the cross section for various values of Q.
-    cross	
+    cross
         Calculates the cross section.
     dsigma  
         Calculates dsigma/dcos(theta).
@@ -20,7 +20,7 @@ they are called by
 Calculating cross sections for various values of Q.
 ---------------------------------------------------
 
-The mode qdep calculates the cross section for pp -> 𝜒2^0 𝜒1^+ with values from Q = qmin..qmax GeV.
+The mode qdep calculates the cross section for pp -> 𝜒^0 𝜒^+ with values from Q = qmin..qmax GeV.
 
 ### Flags for qdep
     -sqrts	
@@ -39,6 +39,10 @@ The mode qdep calculates the cross section for pp -> 𝜒2^0 𝜒1^+ with values
          maximal value of Q in GeV (default: 500)
     -steps
          number of different Q (default: 10)
+    -neutralino
+         selects neutralino (default: 2)
+    -chargino
+         selects chargino (default: 1)
 
 ### Example
 
@@ -47,7 +51,7 @@ The mode qdep calculates the cross section for pp -> 𝜒2^0 𝜒1^+ with values
 Calculating the cross section.
 ------------------------------
 
-The mode cross calculates the cross section for pp -> 𝜒2^0 𝜒1^+.
+The mode cross calculates the cross section for pp -> 𝜒^0 𝜒^+.
 
 ###  Flags for cross
 
@@ -64,6 +68,10 @@ The mode cross calculates the cross section for pp -> 𝜒2^0 𝜒1^+.
     -Q
           factorization scale in GeV. (default: 0.0)
           If Q equals 0.0 Q will be set to the average of the two neutralino masses.
+    -neutralino
+         selects neutralino (default: 2)
+    -chargino
+         selects chargino (default: 1)
 
 
 ### Example
@@ -73,8 +81,7 @@ The mode cross calculates the cross section for pp -> 𝜒2^0 𝜒1^+.
 Calculates dsigma/dcos(theta)
 -----------------------------
 
-The mode dsigma calculates the differential cross section for qq_ -> chi_2^0 chi_1^+
-
+The mode dsigma calculates the differential cross section for qq_ -> 𝜒^0 𝜒^+.
 ### Flags for dsigma
 
     -sqrts
@@ -85,6 +92,10 @@ The mode dsigma calculates the differential cross section for qq_ -> chi_2^0 chi
           initial state quarks. Expected "ud", "cs" (default: "ud")
     -samples  
           the sampling rate of dsigma/dcos(theta). (default: 30)
+    -neutralino
+         selects neutralino (default: 2)
+    -chargino
+         selects chargino (default: 1)
 
 Requirements
 ------------

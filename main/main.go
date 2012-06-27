@@ -64,12 +64,20 @@ func qdep(input *qdepInput) {
 		return
 	}
 
-	file, err := os.Create(*input.fileout)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %s\n", err)
-		return
+	var (
+		err  error
+		file *os.File
+	)
+	if *input.fileout != "" {
+		file, err = os.Create(*input.fileout)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+			return
+		}
+		defer file.Close()
+	} else {
+		file = os.Stdout
 	}
-	defer file.Close()
 
 	// check input parameters
 	sqrts := *input.sqrts
@@ -150,12 +158,20 @@ func cross(input *crossInput) {
 	rand.Seed(time.Now().Unix())
 
 	// create out file
-	file, err := os.Create(*input.fileout)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %s\n", err)
-		return
+	var (
+		err  error
+		file *os.File
+	)
+	if *input.fileout != "" {
+		file, err = os.Create(*input.fileout)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+			return
+		}
+		defer file.Close()
+	} else {
+		file = os.Stdout
 	}
-	defer file.Close()
 
 	// check input parameters
 	sqrts := *input.sqrts
@@ -211,7 +227,7 @@ func cross(input *crossInput) {
 
 type dsigmaInput struct {
 	lhefile    *string
-	outfile    *string
+	fileout    *string
 	quarks     *string
 	sqrts      *float64
 	samples    *int
@@ -221,12 +237,20 @@ type dsigmaInput struct {
 
 func dsigma(input *dsigmaInput) {
 	// create out file
-	file, err := os.Create(*input.outfile)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %s\n", err)
-		return
+	var (
+		err  error
+		file *os.File
+	)
+	if *input.fileout != "" {
+		file, err = os.Create(*input.fileout)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+			return
+		}
+		defer file.Close()
+	} else {
+		file = os.Stdout
 	}
-	defer file.Close()
 
 	// check input parameters
 	sqrts := *input.sqrts
@@ -271,7 +295,7 @@ func dsigma(input *dsigmaInput) {
 	}
 
 	fmt.Fprintf(file, "# dsigma/dcos(theta) for √s = %.1f\n# initial state: %s\n", sqrts, *input.quarks)
-	fmt.Fprintf(file, "#final state: 𝜒_%d^0 𝜒_%d^+\n", neutralino, chargino)
+	fmt.Fprintf(file, "# final state: 𝜒_%d^0 𝜒_%d^+\n", neutralino, chargino)
 	fmt.Fprintln(file, "#\n# cos(theta)    dsigma/dcos(theta)")
 	for i := 0; i < samples; i++ {
 		cosTheta := -1.0 + float64(i)*2.0/float64(samples-1)
@@ -307,7 +331,7 @@ func main() {
 			flagset.PrintDefaults()
 		}
 		input.sqrts = flagset.Float64("sqrts", 14000.0, "center of mass energy in GeV. (default: LHC √s = 14 TeV)")
-		input.fileout = flagset.String("o", "depq.out", "output file")
+		input.fileout = flagset.String("o", "", "output file (default: stdout)")
 		input.pdf = flagset.String("pdf", "cteq6ll", "pdf which should be used.")
 		input.pdfType = flagset.String("pdfType", "LHGrid", "pdf type: LHGrid or LHPdf")
 		input.N = flagset.Int("N", 5000000, "number of monte carlo integration iterations")
@@ -343,7 +367,7 @@ func main() {
 		}
 		input.sqrts = flagset.Float64("sqrts", 14000.0, "center of mass energy in GeV. (default: LHC sqrt(s) = 14 TeV).")
 		input.Q = flagset.Float64("Q", 0.0, "refactorization scale in GeV. If Q equals 0.0 Q will be set to the average of the two neutralino masses")
-		input.fileout = flagset.String("o", "cross.out", "output file")
+		input.fileout = flagset.String("o", "", "output file (default: stdout)")
 		input.pdf = flagset.String("pdf", "cteq6ll", "pdf which should be used.")
 		input.pdfType = flagset.String("pdfType", "LHGrid", "pdf type: LHGrid or LHPdf.")
 		input.N = flagset.Int("N", 5000000, "number of monte carlo integration iterations.")
@@ -367,7 +391,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%s %s [[OPTIONS]] inputfile\n\nOptions:\n", os.Args[0], args[1])
 			flagset.PrintDefaults()
 		}
-		input.outfile = flagset.String("o", "dsigma.out", "output file")
+		input.fileout = flagset.String("o", "", "output file (default: stdout)")
 		input.sqrts = flagset.Float64("sqrts", 14000.0, "center of mass energy in GeV. (default: LHC sqrt(s) = 14 TeV).")
 		input.quarks = flagset.String("quarks", "ud", "Initial state quarks. Expected \"ud\", \"cs\".")
 		input.samples = flagset.Int("samples", 30, "The sampling rate of dsigma/dcos(theta).")
@@ -388,7 +412,7 @@ func main() {
 			input.lhefile = &in
 		}
 		println("infile:  ", *input.lhefile)
-		println("outfile: ", *input.outfile)
+		println("outfile: ", *input.fileout)
 		dsigma(input)
 	default:
 		fmt.Fprintf(os.Stderr, "'%s' is not a command", args[1])

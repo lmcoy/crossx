@@ -26,7 +26,7 @@ The mode qdep calculates the cross section for pp → 𝜒^0 𝜒^+ with values 
     -sqrts	
          center of mass energy in GeV. (default: LHC √s = 14 TeV)
     -o	
-         output file (default: depq.out)
+         output file (default: stdout)
     -pdf	
          pdf which should be used. (default: cteq6ll)
     -pdfType
@@ -60,7 +60,7 @@ The mode cross calculates the cross section for pp → 𝜒^0 𝜒^+.
     -sqrts
           center of mass energy in GeV. (default: LHC √s = 14 TeV)
     -o
-          output file (default: depq.out)
+          output file (default: stdout)
     -pdf 
           pdf which should be used. (default: cteq6ll)
     -pdfType 
@@ -91,7 +91,7 @@ The mode dsigma calculates the differential cross section for qq_ → 𝜒^0 �
     -sqrts
           center of mass energy in GeV. (default: LHC √s = 14 TeV)
     -o
-          output file (default: dsigma.out)
+          output file (default: stdout)
     -quarks
           initial state quarks. Expected "ud", "cs" (default: "ud")
     -samples  

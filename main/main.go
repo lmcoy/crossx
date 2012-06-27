@@ -260,8 +260,8 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%s %s [[OPTIONS]] inputfiles\n\nOptions:\n", os.Args[0], args[1])
 			flagset.PrintDefaults()
 		}
-		input.sqrts = flag.Float64("sqrts", 14000.0, "center of mass energy in GeV. (default: LHC sqrt(s) = 14 TeV).")
-		input.Q = flag.Float64("Q", 0.0, "refactorization scale in GeV. If Q equals 0.0 Q will be set to the average of the two neutralino masses")
+		input.sqrts = flagset.Float64("sqrts", 14000.0, "center of mass energy in GeV. (default: LHC sqrt(s) = 14 TeV).")
+		input.Q = flagset.Float64("Q", 0.0, "refactorization scale in GeV. If Q equals 0.0 Q will be set to the average of the two neutralino masses")
 		input.fileout = flagset.String("o", "cross.out", "output file")
 		input.pdf = flagset.String("pdf", "cteq6ll", "pdf which should be used.")
 		input.pdfType = flagset.String("pdfType", "LHGrid", "pdf type: LHGrid or LHPdf.")
@@ -289,7 +289,7 @@ func main() {
 			flagset.PrintDefaults()
 		}
 		input.outfile = flagset.String("o", "dsigma.out", "output file")
-		input.sqrts = flag.Float64("sqrts", 14000.0, "center of mass energy in GeV. (default: LHC sqrt(s) = 14 TeV).")
+		input.sqrts = flagset.Float64("sqrts", 14000.0, "center of mass energy in GeV. (default: LHC sqrt(s) = 14 TeV).")
 		input.quarks = flagset.String("quarks", "ud", "Initial state quarks. Expected \"ud\", \"cs\".")
 		input.samples = flagset.Int("samples", 30, "The sampling rate of dsigma/dcos(theta).")
 		flagset.Parse(args[2:])

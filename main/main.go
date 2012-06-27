@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"physics/hep/nccross"
@@ -130,7 +131,7 @@ func cross(input *crossInput) {
 		}
 		Q := *input.Q
 		if Q == 0.0 {
-			Q = (p.M_n[i] + p.M_c[j]) / 2.0
+			Q = (math.Abs(p.M_n[i]) + math.Abs(p.M_c[j])) / 2.0
 			fmt.Printf("    using %8.2f as factorization scale\n", Q)
 		}
 		fmt.Printf("    using %d monte carlo iterations\n", N)

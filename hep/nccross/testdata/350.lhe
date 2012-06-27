@@ -1,0 +1,207 @@
+# SUSY Les Houches Accord 2 - MSSM spectrum + Decays
+# SPheno v3.1.10 
+# W. Porod, Comput. Phys. Commun. 153 (2003) 275-315, hep-ph/0301101
+# in case of problems send email to porod@physik.uni-wuerzburg.de
+# Created: 01.06.2012,  12:03
+Block SPINFO         # Program information
+     1   SPheno      # spectrum calculator
+     2   v3.1.10     # version number
+#
+Block SPhenoINFO     # SPheno specific information
+    1      2         # using 2-loop RGEs
+    2      1         # using running masses for boundary conditions at mZ
+Block MODSEL  # Model selection
+    1    1    # mSUGRA model
+Block MINPAR  # Input parameters
+    1    1.00000000E+02  # m0      
+    2    3.50000000E+02  # m12     
+    3    4.16048002E+00  # tanb at m_Z   
+    4    1.00000000E+00  # cos(phase_mu)
+    5    3.00000000E+02  # A0
+#
+Block gauge Q=  1.99595422E+16  # (GUT scale)
+   1    7.16397859E-01  # g'(Q)^DRbar
+   2    7.16397859E-01  # g(Q)^DRbar
+   3    7.07566044E-01  # g3(Q)^DRbar
+Block EXTPAR  # non-universal input parameters
+   25    4.00000000E+00  # tan(beta)
+Block SMINPUTS  # SM parameters
+         1     1.27932360E+02  # alpha_em^-1(MZ)^MSbar
+         2     1.16639000E-05  # G_mu [GeV^-2]
+         3     1.19000000E-01  # alpha_s(MZ)^MSbar
+         4     9.11876000E+01  # m_Z(pole)
+         5     4.20000000E+00  # m_b(m_b), MSbar
+         6     1.72900000E+02  # m_t(pole)
+         7     1.77700000E+00  # m_tau(pole)
+         8     0.00000000E+00  # m_nu_3
+        11     5.10998910E-04  # m_e(pole)
+        12     0.00000000E+00  # m_nu_1
+        13     1.05658000E-01  # m_muon(pole)
+        14     0.00000000E+00  # m_nu_2
+        21     5.00000000E-03  # m_d(2 GeV), MSbar
+        22     3.00000000E-03  # m_u(2 GeV), MSbar
+        23     1.05000000E-01  # m_s(2 GeV), MSbar
+        24     1.27000000E+00  # m_c(m_c), MSbar
+Block gauge Q=  1.00000000E+03  # (SUSY scale)
+   1    3.63280918E-01  # g'(Q)^DRbar
+   2    6.45195165E-01  # g(Q)^DRbar
+   3    1.07444235E+00  # g3(Q)^DRbar
+Block Yu Q=  1.00000000E+03  # (SUSY scale)
+  1  1     8.67887140E-06   # Y_u(Q)^DRbar
+  2  2     3.67405585E-03   # Y_c(Q)^DRbar
+  3  3     8.89010401E-01   # Y_t(Q)^DRbar
+Block Yd Q=  1.00000000E+03  # (SUSY scale)
+  1  1     5.68355727E-05   # Y_d(Q)^DRbar
+  2  2     1.19354691E-03   # Y_s(Q)^DRbar
+  3  3     5.70290349E-02   # Y_b(Q)^DRbar
+Block Ye Q=  1.00000000E+03  # (SUSY scale)
+  1  1     1.21107089E-05   # Y_e(Q)^DRbar
+  2  2     2.50410202E-03   # Y_mu(Q)^DRbar
+  3  3     4.21162210E-02   # Y_tau(Q)^DRbar
+Block Au Q=  1.00000000E+03  # (SUSY scale)
+  1  1    -6.07761850E+02   # A_u(Q)^DRbar
+  2  2    -6.07760214E+02   # A_c(Q)^DRbar
+  3  3    -5.16157706E+02   # A_t(Q)^DRbar
+Block Ad Q=  1.00000000E+03  # (SUSY scale)
+  1  1    -7.00293610E+02   # A_d(Q)^DRbar
+  2  2    -7.00292921E+02   # A_s(Q)^DRbar
+  3  3    -6.70037518E+02   # A_b(Q)^DRbar
+Block Ae Q=  1.00000000E+03  # (SUSY scale)
+  1  1     8.50033539E+01   # A_e(Q)^DRbar
+  2  2     8.50024860E+01   # A_mu(Q)^DRbar
+  3  3     8.47578474E+01   # A_tau(Q)^DRbar
+Block MSOFT Q=  1.00000000E+03  # soft SUSY breaking masses at Q
+   1    1.45682908E+02  # M_1
+   2    2.70776523E+02  # M_2
+   3    7.87979164E+02  # M_3
+  21    6.27245462E+04  # M^2_(H,d)
+  22   -1.75711354E+05  # M^2_(H,u)
+  31    2.52694934E+02  # M_(L,11)
+  32    2.52694443E+02  # M_(L,22)
+  33    2.52555904E+02  # M_(L,33)
+  34    1.62612703E+02  # M_(E,11)
+  35    1.62611161E+02  # M_(E,22)
+  36    1.62175953E+02  # M_(E,33)
+  41    7.23738214E+02  # M_(Q,11)
+  42    7.23737225E+02  # M_(Q,22)
+  43    6.72552584E+02  # M_(Q,33)
+  44    6.97672881E+02  # M_(U,11)
+  45    6.97671015E+02  # M_(U,22)
+  46    5.84164952E+02  # M_(U,33)
+  47    6.94510053E+02  # M_(D,11)
+  48    6.94509842E+02  # M_(D,22)
+  49    6.94035849E+02  # M_(D,33)
+Block MASS  # Mass spectrum
+#   PDG code      mass          particle
+         6     1.72900000E+02  # m_t(pole)
+        23     9.11876000E+01  # m_Z(pole)
+        24     8.03221682E+01  # W+
+        15     1.77700000E+00  # m_tau(pole)
+        25     1.04936853E+02  # h0
+        35     5.37802543E+02  # H0
+        36     5.35804724E+02  # A0
+        37     5.42339606E+02  # H+
+   1000001     7.71385015E+02  # ~d_L
+   2000001     7.39952474E+02  # ~d_R
+   1000002     7.67794160E+02  # ~u_L
+   2000002     7.41751527E+02  # ~u_R
+   1000003     7.71384139E+02  # ~s_L
+   2000003     7.39951967E+02  # ~s_R
+   1000004     7.67797669E+02  # ~c_L
+   2000004     7.41745221E+02  # ~c_R
+   1000005     7.11967736E+02  # ~b_1
+   2000005     7.40076502E+02  # ~b_2
+   1000006     5.88816426E+02  # ~t_1
+   2000006     7.64866456E+02  # ~t_2
+   1000011     2.60402223E+02  # ~e_L-
+   2000011     1.70350648E+02  # ~e_R-
+   1000012     2.49086673E+02  # ~nu_eL
+   1000013     2.60403429E+02  # ~mu_L-
+   2000013     1.70346465E+02  # ~mu_R-
+   1000014     2.49086114E+02  # ~nu_muL
+   1000015     1.69169489E+02  # ~tau_1-
+   2000015     2.60739152E+02  # ~tau_2-
+   1000016     2.48928558E+02  # ~nu_tauL
+   1000021     8.36346994E+02  # ~g
+   1000022     1.38194169E+02  # ~chi_10
+   1000023     2.56777688E+02  # ~chi_20
+   1000025    -4.59432516E+02  # ~chi_30
+   1000035     4.82266163E+02  # ~chi_40
+   1000024     2.56161507E+02  # ~chi_1+
+   1000037     4.81136527E+02  # ~chi_2+
+# Higgs mixing
+Block alpha # Effective Higgs mixing angle
+          -2.60553109E-01   # alpha
+Block Hmix Q=  1.00000000E+03  # Higgs mixing parameters
+   1    4.56543176E+02  # mu
+   2    4.00000000E+00  # tan[beta](Q)
+   3    2.43883731E+02  # v(Q)
+   4    2.62074978E+05  # m^2_A(Q)
+Block stopmix # stop mixing matrix
+   1  1     4.94865435E-01   # Re[R_st(1,1)]
+   1  2     8.68969621E-01   # Re[R_st(1,2)]
+   2  1    -8.68969621E-01   # Re[R_st(2,1)]
+   2  2     4.94865435E-01   # Re[R_st(2,2)]
+Block sbotmix # sbottom mixing matrix
+   1  1     9.87921630E-01   # Re[R_sb(1,1)]
+   1  2     1.54954359E-01   # Re[R_sb(1,2)]
+   2  1    -1.54954359E-01   # Re[R_sb(2,1)]
+   2  2     9.87921630E-01   # Re[R_sb(2,2)]
+Block staumix # stau mixing matrix
+   1  1     7.99038691E-02   # Re[R_sta(1,1)]
+   1  2     9.96802574E-01   # Re[R_sta(1,2)]
+   2  1    -9.96802574E-01   # Re[R_sta(2,1)]
+   2  2     7.99038691E-02   # Re[R_sta(2,2)]
+Block Nmix # neutralino mixing matrix
+   1  1    -9.89333962E-01   # Re[N(1,1)]
+   1  2     5.15286337E-02   # Re[N(1,2)]
+   1  3    -1.21234693E-01   # Re[N(1,3)]
+   1  4     6.21712150E-02   # Re[N(1,4)]
+   2  1    -9.12237425E-02   # Re[N(2,1)]
+   2  2    -9.47244453E-01   # Re[N(2,2)]
+   2  3     2.50788257E-01   # Re[N(2,3)]
+   2  4    -1.77514576E-01   # Re[N(2,4)]
+   3  1    -3.83766798E-02   # Re[N(3,1)]
+   3  2     5.62982566E-02   # Re[N(3,2)]
+   3  3     7.01099077E-01   # Re[N(3,3)]
+   3  4     7.09801254E-01   # Re[N(3,4)]
+   4  1    -1.06882038E-01   # Re[N(4,1)]
+   4  2     3.11292872E-01   # Re[N(4,2)]
+   4  3     6.56404969E-01   # Re[N(4,3)]
+   4  4    -6.78826557E-01   # Re[N(4,4)]
+Block Umix # chargino mixing matrix
+   1  1    -9.29711912E-01   # Re[U(1,1)]
+   1  2     3.68287606E-01   # Re[U(1,2)]
+   2  1     3.68287606E-01   # Re[U(2,1)]
+   2  2     9.29711912E-01   # Re[U(2,2)]
+Block Vmix # chargino mixing matrix
+   1  1    -9.64988357E-01   # Re[V(1,1)]
+   1  2     2.62292720E-01   # Re[V(1,2)]
+   2  1     2.62292720E-01   # Re[V(2,1)]
+   2  2     9.64988357E-01   # Re[V(2,2)]
+Block SPhenoLowEnergy  # low energy observables
+    1    3.29671997E-04   # BR(b -> s gamma)
+    2    1.77179667E-06   # BR(b -> s mu+ mu-)
+    3    4.32970102E-05   # BR(b -> s nu nu)
+    4    5.88043491E-11   # BR(Bd -> mu+ mu-)
+    5    3.98514399E-09   # BR(Bs -> mu+ mu-)
+    6    1.17262476E-04   # BR(B_u -> tau nu)
+    7    9.97551176E-01   # BR(B_u -> tau nu)/BR(B_u -> tau nu)_SM
+    8    3.07160463E-01   # |Delta(M_Bd)| [ps^-1] 
+    9    2.31722485E+01   # |Delta(M_Bs)| [ps^-1] 
+   20    2.99498531E-14   # Delta(g-2)_electron/2
+   21    5.43737098E-10   # Delta(g-2)_muon/2
+   22   -1.73696190E-08   # Delta(g-2)_tau/2
+   23    0.00000000E+00   # electric dipole moment of the electron
+   24    0.00000000E+00   # electric dipole moment of the muon
+   25    0.00000000E+00   # electric dipole moment of the tau
+   26    0.00000000E+00   # Br(mu -> e gamma)
+   27    0.00000000E+00   # Br(tau -> e gamma)
+   28    0.00000000E+00   # Br(tau -> mu gamma)
+   29    0.00000000E+00   # Br(mu -> 3 e)
+   30    0.00000000E+00   # Br(tau -> 3 e)
+   31    0.00000000E+00   # Br(tau -> 3 mu)
+   39    1.59225713E-03   # Delta(rho_parameter)
+   40    0.00000000E+00   # BR(Z -> e mu)
+   41    0.00000000E+00   # BR(Z -> e tau)
+   42    0.00000000E+00   # BR(Z -> mu tau)

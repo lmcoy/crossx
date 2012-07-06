@@ -21,6 +21,33 @@ const (
 	MissingTransverseEnergy
 )
 
+const (
+	photonString            = "photon"
+	electronString          = "electron"
+	muonString              = "muon"
+	tauString               = "tau"
+	jetString               = "jet"
+	missingTransverseString = "missing transverse energy"
+)
+
+func (t Type) String() string {
+	switch t {
+	case Photon:
+		return photonString
+	case Electron:
+		return electronString
+	case Muon:
+		return muonString
+	case Tau:
+		return tauString
+	case Jet:
+		return jetString
+	case MissingTransverseEnergy:
+		return missingTransverseString
+	}
+	return "unkown object"
+}
+
 // Object represents an object seen by the detector
 type Object struct {
 	// type of the object
@@ -51,6 +78,18 @@ type Event struct {
 	Objects []Object
 }
 
+func (e *Event) String() string {
+	result := "{"
+	for i, o := range e.Objects {
+		result += fmt.Sprintf("%s", o.Typ.String())
+		if i < len(e.Objects)-1 {
+			result += ", "
+		}
+	}
+	result += "}"
+	return result
+}
+
 // NumberOfJets returns the number of jets in the event.
 func (e *Event) NumberOfJets() int {
 	jets := 0
@@ -60,6 +99,17 @@ func (e *Event) NumberOfJets() int {
 		}
 	}
 	return jets
+}
+
+// NumberOfPhotons returns the number of photons in the event.
+func (e *Event) NumberOfPhotons() int {
+	photons := 0
+	for _, o := range e.Objects {
+		if o.Typ == Photon {
+			photons += 1
+		}
+	}
+	return photons
 }
 
 // NumberOfMuons returns the number of muons in the event.
@@ -81,6 +131,20 @@ func (e *Event) NumberOfMuons() (plus, minus int) {
 func (e *Event) NumberOfElectrons() (plus, minus int) {
 	for _, o := range e.Objects {
 		if o.Typ == Electron {
+			switch {
+			case o.NumberOfTracks < 0:
+				minus += 1
+			case o.NumberOfTracks > 0:
+				plus += 1
+			}
+		}
+	}
+	return
+}
+
+func (e *Event) NumberOfTaus() (plus, minus int) {
+	for _, o := range e.Objects {
+		if o.Typ == Tau {
 			switch {
 			case o.NumberOfTracks < 0:
 				minus += 1

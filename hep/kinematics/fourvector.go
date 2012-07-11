@@ -96,3 +96,7 @@ func (fv *FourVector) ET() float64 {
 func (fv *FourVector) Dot(fv2 *FourVector) float64 {
 	return fv[0]*fv2[0] - fv[1]*fv2[1] - fv[2]*fv2[2] - fv[3]*fv2[3]
 }
+
+func (fv *FourVector) Plus(fv2 *FourVector) *FourVector {
+	return &FourVector{fv[0] + fv2[0], fv[1] + fv2[1], fv[2] + fv2[2], fv[3] + fv2[3]}
+}

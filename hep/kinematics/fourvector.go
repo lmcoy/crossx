@@ -97,6 +97,12 @@ func (fv *FourVector) Dot(fv2 *FourVector) float64 {
 	return fv[0]*fv2[0] - fv[1]*fv2[1] - fv[2]*fv2[2] - fv[3]*fv2[3]
 }
 
+// Plus returns a new FourVector fv + fv2.
 func (fv *FourVector) Plus(fv2 *FourVector) *FourVector {
 	return &FourVector{fv[0] + fv2[0], fv[1] + fv2[1], fv[2] + fv2[2], fv[3] + fv2[3]}
+}
+
+// Minus returns a new FourVector fv - fv2.
+func (fv *FourVector) Minus(fv2 *FourVector) *FourVector {
+	return &FourVector{fv[0] - fv2[0], fv[1] - fv2[1], fv[2] - fv2[2], fv[3] - fv2[3]}
 }

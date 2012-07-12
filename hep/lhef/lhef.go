@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"physics/hep/kinematics"
+	"physics/hep/pdg"
 	"strconv"
 	"strings"
 )
@@ -23,7 +24,7 @@ const (
 type Object struct {
 	// PDG monte carlo code of particle
 	// name in format specification: IDUP
-	Typ int64
+	Typ pdg.Particle
 	// name in format specification: ISTUP
 	State int64
 	// name in format specification: MOTHUP
@@ -54,6 +55,43 @@ type Event struct {
 	// name in format specification: AQCDUP
 	AlphaQCD float64
 	Objects  []*Object
+}
+
+// NumberOfParticle returns the number of particle with pdfcode and state.
+func (e *Event) NumberOfParticle(pdgcode pdg.Particle, state int) (count int) {
+	for _, obj := range e.Objects {
+		if obj.State == int64(state) && obj.Typ == pdgcode {
+			count += 1
+		}
+	}
+	return
+}
+
+// FindParticle returns the indices of particles of type pdgcodes in a certain state.
+func (e *Event) FindParticle(state int, pdgcodes ...pdg.Particle) (index []int) {
+	index = make([]int, 0, 2*len(pdgcodes))
+	for i, obj := range e.Objects {
+		if obj.State == int64(state) {
+			for _, pdg := range pdgcodes {
+				if obj.Typ == pdg {
+					index = append(index, i)
+					break
+				}
+			}
+		}
+	}
+	return
+}
+
+// ParticlesInState returns the indices of particles which are in a certain state.
+func (e *Event) ParticlesInState(state int) (indices []int) {
+	indices = make([]int, 0, len(e.Objects)-6)
+	for i, obj := range e.Objects {
+		if obj.State == int64(state) {
+			indices = append(indices, i)
+		}
+	}
+	return
 }
 
 // Process contains information about a process which
@@ -132,6 +170,7 @@ func parseInit(input []byte) (info *Info, err error) {
 		return nil, fmt.Errorf("could not read number of processes in colum 10: %s", err)
 	}
 
+	// check if infos in file are consistent.
 	if numProcesses != int64(len(lines)-1) {
 		return nil, fmt.Errorf("<init> says there are %d processes but only %d are available", numProcesses, len(lines)-1)
 	}
@@ -156,6 +195,7 @@ func parseProcess(line string) (p *Process, err error) {
 		return nil, fmt.Errorf("wrong number of columns in process")
 	}
 	// Parse all all columns
+	// format: crosssection  error  Max  ID
 	if p.CrossSection, err = strconv.ParseFloat(fields[0], 64); err != nil {
 		return nil, fmt.Errorf("could not read cross section: %s", err)
 	}
@@ -222,9 +262,11 @@ func parseObject(line string) (obj *Object, err error) {
 	if len(fields) != 13 {
 		return nil, fmt.Errorf("wrong number of columns for an object in an event: %d expected: %d.", len(fields), 13)
 	}
-	if obj.Typ, err = strconv.ParseInt(fields[0], 10, 64); err != nil {
+	var pdgCode int64
+	if pdgCode, err = strconv.ParseInt(fields[0], 10, 64); err != nil {
 		return nil, fmt.Errorf("could not read ID: %s", err)
 	}
+	obj.Typ = pdg.Particle(pdgCode)
 	if obj.State, err = strconv.ParseInt(fields[1], 10, 64); err != nil {
 		return nil, fmt.Errorf("could not read state: %s", err)
 	}
@@ -241,6 +283,9 @@ func parseObject(line string) (obj *Object, err error) {
 		return nil, fmt.Errorf("could not read color: %s", err)
 	}
 
+	// parse four vector (PUP). 
+	// 1st three columns contains momentm (px, py, pz)
+	// 4th column contains p^0
 	var fvector [4]float64
 	if fvector[0], err = strconv.ParseFloat(fields[6], 64); err != nil {
 		return nil, fmt.Errorf("could not read four vector component: %s", err)
@@ -257,6 +302,7 @@ func parseObject(line string) (obj *Object, err error) {
 
 	obj.FourVector = kinematics.NewFourVector(fvector[3], fvector[0], fvector[1], fvector[2])
 
+	// invariant mass (PUP(5))
 	if obj.InvariantMass, err = strconv.ParseFloat(fields[10], 64); err != nil {
 		return nil, fmt.Errorf("could not read invariant mass: %s", err)
 	}
@@ -289,6 +335,7 @@ func Read(r io.Reader) (info *Info, events []*Event, err error) {
 		t, err := decoder.Token()
 		if err != nil {
 			if err == io.EOF {
+				// EOF is not an error
 				err = nil
 			} else {
 				return nil, nil, err
@@ -302,7 +349,7 @@ func Read(r io.Reader) (info *Info, events []*Event, err error) {
 		switch se := t.(type) {
 		case xml.StartElement:
 			switch se.Name.Local {
-			case "init":
+			case "init": // parse <init>
 				var e struct {
 					Content []byte `xml:",chardata"`
 				}
@@ -311,7 +358,7 @@ func Read(r io.Reader) (info *Info, events []*Event, err error) {
 				if err != nil {
 					return nil, nil, err
 				}
-			case "event":
+			case "event": // parse <event>
 				var e struct {
 					Content []byte `xml:",chardata"`
 				}

@@ -47,11 +47,11 @@ func NewParameterFromLheFile(path string) (*Parameter, error) {
 		N:    N,
 		U:    U,
 		V:    V,
-		M_n:  [4]float64{masses[pdg.Neutralino1], masses[pdg.Neutralino2], masses[pdg.Neutralino3], masses[pdg.Neutralino4]},
-		M_c:  [2]float64{masses[pdg.Chargino1], masses[pdg.Chargino2]},
-		M_su: masses[pdg.SUQuarkL],
-		M_sd: masses[pdg.SDQuarkL],
-		M_ss: masses[pdg.SSQuarkL],
-		M_sc: masses[pdg.SCQuarkL],
+		M_n:  [4]float64{masses[int(pdg.Neutralino1)], masses[int(pdg.Neutralino2)], masses[int(pdg.Neutralino3)], masses[int(pdg.Neutralino4)]},
+		M_c:  [2]float64{masses[int(pdg.Chargino1)], masses[int(pdg.Chargino2)]},
+		M_su: masses[int(pdg.SUQuarkL)],
+		M_sd: masses[int(pdg.SDQuarkL)],
+		M_ss: masses[int(pdg.SSQuarkL)],
+		M_sc: masses[int(pdg.SCQuarkL)],
 	}, nil
 }

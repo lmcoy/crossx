@@ -234,11 +234,13 @@ func testprecalc(neut, charg int, t *testing.T, p []precalc) {
 
 // test pp -> 𝜒_2^0 𝜒_1^+ with prospino results.
 func TestSigma(t *testing.T) {
+	fmt.Println("This test takes a long time. hang on...")
 	testprecalc(1, 0, t, tests)
 }
 
 // test pp -> 𝜒_3^0 𝜒_1^+ with prospino results. 
 // 𝜒_3^0 has negative mass!
 func TestSigma2(t *testing.T) {
+	fmt.Println("This test takes a long time. hang on...")
 	testprecalc(2, 0, t, tests_20)
 }

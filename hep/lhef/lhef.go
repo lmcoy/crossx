@@ -85,7 +85,7 @@ func (e *Event) FindParticle(state int, pdgcodes ...pdg.Particle) (index []int) 
 
 // ParticlesInState returns the indices of particles which are in a certain state.
 func (e *Event) ParticlesInState(state int) (indices []int) {
-	indices = make([]int, 0, len(e.Objects)-6)
+	indices = make([]int, 0, len(e.Objects))
 	for i, obj := range e.Objects {
 		if obj.State == int64(state) {
 			indices = append(indices, i)

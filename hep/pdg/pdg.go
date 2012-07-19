@@ -81,6 +81,7 @@ const (
 // global variables which should be accessed by Jet() ... only. 
 // Important: This variables should never be changed!
 var jet = [...]Particle{Gluon, UQuark, -UQuark, DQuark, -DQuark, SQuark, -SQuark, CQuark, -CQuark}
+var qcd = [...]Particle{Gluon, UQuark, -UQuark, DQuark, -DQuark, SQuark, -SQuark, CQuark, -CQuark, BQuark, -BQuark, TQuark, -TQuark}
 var neutrino = [...]Particle{ElectronNeutrino, MuonNeutrino, TauNeutrino}
 var antiNeutrino = [...]Particle{-ElectronNeutrino, -MuonNeutrino, -TauNeutrino}
 
@@ -88,6 +89,13 @@ var antiNeutrino = [...]Particle{-ElectronNeutrino, -MuonNeutrino, -TauNeutrino}
 func Jet() (j []Particle) {
 	j = make([]Particle, len(jet))
 	copy(j, jet[0:])
+	return
+}
+
+// QCD returns a slice with all QCD particles i.e. quarks, antiquarks, gluon
+func QCD() (q []Particle) {
+	q = make([]Particle, len(qcd))
+	copy(q, qcd[0:])
 	return
 }
 

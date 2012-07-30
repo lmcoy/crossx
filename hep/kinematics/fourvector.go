@@ -74,7 +74,7 @@ func (fv *FourVector) E() float64 {
 
 // ThreeVector returns the spatial part of the four vector.
 func (fv *FourVector) ThreeVector() linalg.Vector3D {
-	return linalg.Vector3D{fv[1], fv[2], fv[3]}
+	return linalg.Vector3D{0: fv[1], 1: fv[2], 2: fv[3]}
 }
 
 // PT returns the transverse momentum.

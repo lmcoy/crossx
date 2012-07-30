@@ -14,7 +14,7 @@ var preObjs = []*Object{
 		State:         -1,
 		Mother:        [2]int64{0, 0},
 		Color:         [2]int64{0, 501},
-		FourVector:    &kinematics.FourVector{399.19743011, 0, 0, 399.19743011},
+		FourVector:    &kinematics.FourVector{0: 399.19743011, 1: 0, 2: 0, 3: 399.19743011},
 		InvariantMass: 0,
 		LifeTime:      0,
 		Spin:          1,
@@ -24,7 +24,7 @@ var preObjs = []*Object{
 		State:         -1,
 		Mother:        [2]int64{0, 0},
 		Color:         [2]int64{501, 0},
-		FourVector:    &kinematics.FourVector{3.9435316792, 0, 0, -3.9435316792},
+		FourVector:    &kinematics.FourVector{0: 3.9435316792, 1: 0, 2: 0, 3: -3.9435316792},
 		InvariantMass: 0,
 		LifeTime:      0,
 		Spin:          -1,
@@ -34,7 +34,7 @@ var preObjs = []*Object{
 		State:         2,
 		Mother:        [2]int64{1, 2},
 		Color:         [2]int64{0, 0},
-		FourVector:    &kinematics.FourVector{403.14096179, 0, 0, 395.25389843},
+		FourVector:    &kinematics.FourVector{0: 403.14096179, 1: 0, 2: 0, 3: 395.25389843},
 		InvariantMass: 79.35358119,
 		LifeTime:      0,
 		Spin:          0,
@@ -44,7 +44,7 @@ var preObjs = []*Object{
 		State:         1,
 		Mother:        [2]int64{3, 3},
 		Color:         [2]int64{0, 0},
-		FourVector:    &kinematics.FourVector{318.99174739, -30.323238127, 9.9501563813, 317.3912893},
+		FourVector:    &kinematics.FourVector{0: 318.99174739, 1: -30.323238127, 2: 9.9501563813, 3: 317.3912893},
 		InvariantMass: 0,
 		LifeTime:      0,
 		Spin:          1,
@@ -54,7 +54,7 @@ var preObjs = []*Object{
 		State:         1,
 		Mother:        [2]int64{3, 3},
 		Color:         [2]int64{0, 0},
-		FourVector:    &kinematics.FourVector{84.149214393, 30.323238127, -9.9501563813, 77.862609129},
+		FourVector:    &kinematics.FourVector{0: 84.149214393, 1: 30.323238127, 2: -9.9501563813, 3: 77.862609129},
 		InvariantMass: 0,
 		LifeTime:      0,
 		Spin:          -1,
@@ -144,10 +144,10 @@ func TestRead(t *testing.T) {
 
 	// check the content
 	if init.BeamEnergy[0] != 3500.0 {
-		t.Errorf("wrong beam energy 1:\nexpected: %8.3f\ngot:      %.8.3f", 3500.0, init.BeamEnergy[0])
+		t.Errorf("wrong beam energy 1:\nexpected: %8.3f\ngot:      %8.3f", 3500.0, init.BeamEnergy[0])
 	}
 	if init.BeamEnergy[1] != 3500.0 {
-		t.Errorf("wrong beam energy 2:\nexpected: %8.3f\ngot:      %.8.3f", 3500.0, init.BeamEnergy[1])
+		t.Errorf("wrong beam energy 2:\nexpected: %8.3f\ngot:      %8.3f", 3500.0, init.BeamEnergy[1])
 	}
 
 	for i, event := range events {

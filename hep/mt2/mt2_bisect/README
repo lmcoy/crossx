@@ -1,0 +1,3 @@
+INSTALL:
+run make all
+copy mt2_bisect.so to $LD_LIBRARY_PATH

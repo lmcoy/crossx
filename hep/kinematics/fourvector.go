@@ -58,7 +58,7 @@ func (fv *FourVector) Theta() float64 {
 
 // PseudoRapidity returns the pseudorapidity.
 func (fv *FourVector) PseudoRapidity() float64 {
-	return math.Log(math.Tan(fv.Theta() / 2.0))
+	return -math.Log(math.Tan(fv.Theta() / 2.0))
 }
 
 // ThreeVectorAbs returns the length of the spatial components, i.e.

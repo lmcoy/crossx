@@ -23,7 +23,7 @@ func DeltaPhi(v1, v2 *linalg.Vector3D) float64 {
 func pseudoRapidity(v *linalg.Vector3D) float64 {
 	tmp := math.Sqrt(v[0]*v[0] + v[1]*v[1])
 	theta := math.Atan2(tmp, v[2])
-	return math.Log(math.Tan(theta / 2.0))
+	return -math.Log(math.Tan(theta / 2.0))
 }
 
 func DeltaR(v1, v2 *linalg.Vector3D) float64 {

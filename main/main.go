@@ -308,7 +308,7 @@ func main() {
 	args := os.Args
 
 	printUsage := func() {
-		fmt.Fprintln(os.Stderr, "%s calculates the cross section for pp -> 𝜒^0 𝜒^+.", args[0])
+		fmt.Fprintf(os.Stderr, "%s calculates the cross section for pp -> 𝜒^0 𝜒^+.", args[0])
 		fmt.Fprintf(os.Stderr, "\nUsage: \n    %s COMMAND OPTIONS\n\ncommands:\n", args[0])
 		fmt.Fprintln(os.Stderr, "    qdep    -- Calculates the cross section for various values of Q.")
 		fmt.Fprintln(os.Stderr, "    cross   -- Calculates the cross section.")

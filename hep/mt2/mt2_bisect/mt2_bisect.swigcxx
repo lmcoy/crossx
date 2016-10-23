@@ -1,0 +1,11 @@
+%module mt2_bisect
+%{
+#include "mt2_bisect.h"
+%}
+%module mt2
+%include <typemaps.i>
+%include "carrays.i"
+%array_functions(double, doubleArray);
+%include "mt2_bisect.h"
+
+
